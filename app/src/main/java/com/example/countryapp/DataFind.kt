@@ -10,8 +10,9 @@ data class Country(
     val flags: Flags?,
     val currencies: Map<String, Currency>?,
     val population: Int?,
-    //val borders: Map<Int, Any>?,
-    //val gini: Any?,
+    val borders: Any?,
+    val cca3: Any?
+
 )
 data class Currency(
     val name: String?,

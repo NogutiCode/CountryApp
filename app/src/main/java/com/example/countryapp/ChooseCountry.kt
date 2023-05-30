@@ -4,6 +4,13 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.TextUtils
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.TypefaceSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,14 +29,16 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.*
 import java.io.IOException
-
+import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation
+import java.util.*
 
 
 class ChooseCountry : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var navController: NavController
     private val client = OkHttpClient()
-    private var btnId: Int = 0;
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,9 +57,9 @@ class ChooseCountry : Fragment() {
 
         makeApiRequest()
 
-        val btn: ImageButton = view.findViewById(R.id.toCountryInfo)
+        val btn: ImageButton = view.findViewById(R.id.toEntrance)
         btn.setOnClickListener {
-            navController.navigate(R.id.action_chooseCountry_to_countryInfo)
+            navController.navigate(R.id.action_chooseCountry_to_entrance)
         }
     }
 
@@ -82,11 +91,9 @@ class ChooseCountry : Fragment() {
                                 val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
                                 val flag = country.flags?.png
                                 val formattedCapital = capital ?: ""
-                                //println("Element Index: $index")
-                                //println("Name: $name ::: $formattedCapital ::: $flag")
 
                                 activity?.runOnUiThread {
-                                    buildDesign("$name \n$formattedCapital", "$flag", "$index")
+                                    buildDesign("$name \n$formattedCapital" ,"$flag", "$index")
                                     progressBar.visibility = View.GONE
                                 }
 
@@ -103,21 +110,27 @@ class ChooseCountry : Fragment() {
         button.setCompoundDrawablesWithIntrinsicBounds(image, null, null, null)
     }
 
-    private fun buildDesign(ButtonText: String, ImageLink: String, ButtonId: String) {
+    private fun buildDesign(textCountry: String, ImageLink: String, ButtonId: String) {
         val button = Button(requireContext())
         val imageView = ImageView(requireContext())
-        val imageUrl = ImageLink
         val imagePadding = 75
         val btnId = ButtonId.toInt()
+
         button.id = btnId
-        //println(button.id)
-        button.text = ButtonText
+        button.text = textCountry
+        button.isAllCaps = false
         button.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
         button.compoundDrawablePadding = imagePadding
 
         Glide.with(requireContext())
-            .load(imageUrl)
-            .apply(RequestOptions().circleCrop().override(200, 200))
+            .load(ImageLink)
+            .apply(RequestOptions()
+                .transform(
+                    CropCircleWithBorderTransformation(4, Color.GRAY), // Установите желаемую ширину и цвет обводки
+                    RoundedCornersTransformation(16, 0)
+                )
+                .override(200, 200)
+            )
             .transition(DrawableTransitionOptions.withCrossFade())
             .into(object : CustomTarget<Drawable>() {
                 override fun onResourceReady(
@@ -130,9 +143,8 @@ class ChooseCountry : Fragment() {
                     button.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, 300
                     )
-
                     val linearLayout = view?.findViewById<LinearLayout>(R.id.listOfCountries)
-                    setButtonWithImage(button, ButtonText, imageView.drawable)
+                    setButtonWithImage(button, textCountry, imageView.drawable)
                     button.background = ColorDrawable(Color.TRANSPARENT)
 
                     linearLayout?.addView(button)
@@ -140,8 +152,6 @@ class ChooseCountry : Fragment() {
                     button.setOnClickListener {
                         bundle.putInt("buttonId", btnId)
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
-                        //println(btnId)
-
                     }
                 }
                 override fun onLoadCleared(placeholder: Drawable?) {}

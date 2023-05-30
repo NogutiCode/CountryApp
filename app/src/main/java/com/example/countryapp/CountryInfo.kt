@@ -23,7 +23,6 @@ class CountryInfo : Fragment() {
     private var selectedButtonId: Int = 0
     private lateinit var progressBar: ProgressBar
     private val client = OkHttpClient()
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,7 +37,7 @@ class CountryInfo : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val navController = Navigation.findNavController(view)
-        val buttonBack = view.findViewById<Button>(R.id.button)
+        val buttonBack = view.findViewById<ImageButton>(R.id.toChoose)
         buttonBack.setOnClickListener {
             navController.navigate(R.id.action_countryInfo_to_chooseCountry)
         }
@@ -48,7 +47,6 @@ class CountryInfo : Fragment() {
         }
         makeApiRequest()
 
-        //println(selectedButtonId)
 
     }
     fun formatNumberWithCommas(number: Int): String {
@@ -79,34 +77,55 @@ class CountryInfo : Fragment() {
                         val countryList: List<Country>? = adapter.fromJson(responseBody)
                         countryList?.let { list ->
                             for ((index, country) in list.withIndex()) {
+
+                                val name = country.name?.common
+                                val arrayNames = list.map { it.name?.common }.toTypedArray()
+                                val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
+                                val formattedCapital = capital ?: ""
+                                val flag = country.flags?.png
+
+                                val currencyFindFullName = country.currencies?.values?.firstOrNull()
+                                val currencyFullName: String? = currencyFindFullName?.name
+                                val currencyFindSmallName = country.currencies?.toList()?.firstOrNull()
+                                val currencySmallName: String? = currencyFindSmallName?.first
+
+                                val population = country.population.toString()
+                                val formattedPopulation = formatNumberWithCommas(population.toInt())
+
+                                val borders = country.borders?.toString()?.replace("[", "")?.replace("]", "")
+                                val withoutBracketsBorders = borders ?: ""
+                                val withoutComa = withoutBracketsBorders.split(", ")
+                                val arrayBorders = withoutComa.toTypedArray()
+
+                                val arrayFifa = list.map { it.cca3 }.toTypedArray()
+
+                                val builder = StringBuilder()
                                 if (index == selectedButtonId) {
-                                    val name = country.name?.common
-                                    val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
-                                    val flag = country.flags?.png
-
-                                    val currencyFindFullName = country.currencies?.values?.firstOrNull()
-                                    val currencyFullName: String? = currencyFindFullName?.name
-                                    val currencyFindSmallName = country.currencies?.toList()?.firstOrNull()
-                                    val currencySmallName: String? = currencyFindSmallName?.first
-
-                                    val population = country.population.toString()
-                                    val formattedPopulation = formatNumberWithCommas(population.toInt())
-                                    //val gini = country.gini
-
-                                    val formattedCapital = capital ?: ""
-
-                                    //println("Element Index: $index")
-                                    println("Name: $name ::: $formattedCapital ::: $flag ::: $currencySmallName $currencyFullName  ::: $formattedPopulation ::: ")
+                                    for (i in arrayFifa.indices) {
+                                        for (element in arrayBorders) {
+                                            if (element == arrayFifa[i]) {
+                                                if (builder.isNotEmpty()) {
+                                                    builder.append(", ")
+                                                }
+                                                builder.append(arrayNames[i])
+                                            }
+                                        }
+                                    }
+                                    val text = builder.toString()
+                                    println("Name:; $text $name ::: $formattedCapital ::: $flag ::: $currencySmallName $currencyFullName  ::: $formattedPopulation ::: ")
                                 }
+
                                 activity?.runOnUiThread {
                                    progressBar.visibility = View.GONE
                                 }
-
                             }
                         }
                     }
                 }
             }
         })
+    }
+    fun buildDesign(){
+
     }
 }
