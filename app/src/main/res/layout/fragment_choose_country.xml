@@ -5,6 +5,14 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ChooseCountry">
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="142dp"
+        android:layout_height="133dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <ImageButton
         android:id="@+id/toCountryInfo"
         android:src="@drawable/vecteezy_x_png_transparent_9344496_322"
@@ -32,16 +40,17 @@
         android:background="#808080" />
 
     <ScrollView
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="60dp">
 
         <LinearLayout
+            android:id="@+id/listOfCountries"
+            android:padding="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-
 
         </LinearLayout>
 
