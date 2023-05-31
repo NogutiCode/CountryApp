@@ -1,12 +1,9 @@
 package com.example.countryapp
-//Capital
-// Currency
-//Neighbours
-//population
+
 
 data class Country(
-    val name: Name?, //done
-    val capital: Any?, //done
+    val name: Name?,
+    val capital: Any?,
     val flags: Flags?,
     val currencies: Map<String, Currency>?,
     val population: Int?,

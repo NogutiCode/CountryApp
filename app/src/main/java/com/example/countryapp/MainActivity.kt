@@ -1,10 +1,4 @@
 package com.example.countryapp
-import com.example.countryapp.Country
-import com.example.countryapp.Flags
-import com.example.countryapp.Name
-import com.example.countryapp.Currency
-
-
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 

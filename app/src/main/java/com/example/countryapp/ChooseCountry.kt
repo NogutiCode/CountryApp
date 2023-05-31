@@ -4,13 +4,8 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.TextUtils
-import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
-import android.text.style.TypefaceSpan
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +26,6 @@ import okhttp3.*
 import java.io.IOException
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
-import java.util.*
 
 
 class ChooseCountry : Fragment() {
@@ -54,15 +48,17 @@ class ChooseCountry : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         navController = Navigation.findNavController(view)
-
+        initValues(view)
         makeApiRequest()
 
-        val btn: ImageButton = view.findViewById(R.id.toEntrance)
-        btn.setOnClickListener {
+    }
+
+    private fun initValues(view: View){
+        val btnBack: ImageButton = view.findViewById(R.id.toEntrance)
+        btnBack.setOnClickListener {
             navController.navigate(R.id.action_chooseCountry_to_entrance)
         }
     }
-
     private fun makeApiRequest() {
         progressBar.visibility = View.VISIBLE
         val request = Request.Builder()
@@ -94,7 +90,9 @@ class ChooseCountry : Fragment() {
 
                                 activity?.runOnUiThread {
                                     buildDesign("$name \n$formattedCapital" ,"$flag", "$index")
+                                    Handler(Looper.getMainLooper()).postDelayed({
                                     progressBar.visibility = View.GONE
+                                    }, 10)
                                 }
 
                             }
