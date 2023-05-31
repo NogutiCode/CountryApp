@@ -31,6 +31,8 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 class ChooseCountry : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var navController: NavController
+    private lateinit var call: Call
+    private var stopFunction = false
     private val client = OkHttpClient()
 
     override fun onCreateView(
@@ -56,7 +58,12 @@ class ChooseCountry : Fragment() {
     private fun initValues(view: View){
         val btnBack: ImageButton = view.findViewById(R.id.toEntrance)
         btnBack.setOnClickListener {
+            if (::call.isInitialized) {
+                call.cancel()
+            }
+            stopFunction = true
             navController.navigate(R.id.action_chooseCountry_to_entrance)
+
         }
     }
     private fun makeApiRequest() {
@@ -119,7 +126,9 @@ class ChooseCountry : Fragment() {
         button.isAllCaps = false
         button.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
         button.compoundDrawablePadding = imagePadding
-
+        if (stopFunction) {
+            return
+        }
         Glide.with(requireContext())
             .load(ImageLink)
             .apply(RequestOptions()
@@ -137,7 +146,9 @@ class ChooseCountry : Fragment() {
                 ) {
                     imageView.setImageDrawable(resource)
                     imageView.layoutParams = ViewGroup.LayoutParams(300, 300)
-
+                    if (stopFunction) {
+                        return
+                    }
                     button.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, 300
                     )

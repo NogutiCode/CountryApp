@@ -30,11 +30,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="10dp"
         android:text=""
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="35sp"
+        android:textSize="25sp"
         />
 
 
@@ -44,18 +44,13 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="61dp">
+        android:layout_marginTop="91dp">
 
         <LinearLayout
             android:id="@+id/listOfCountries"
-            android:layout_marginTop="50dp"
-
-
-
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
 
             <RelativeLayout
                 android:layout_width="match_parent"

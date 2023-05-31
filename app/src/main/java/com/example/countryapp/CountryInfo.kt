@@ -32,6 +32,8 @@ class CountryInfo : Fragment() {
     private lateinit var layout: LinearLayout
     private lateinit var setCountry: TextView
     private lateinit var navController: NavController
+    private lateinit var call: Call
+    private var stopFunction = false
     private val client = OkHttpClient()
 
     override fun onCreateView(
@@ -54,18 +56,21 @@ class CountryInfo : Fragment() {
         initButtonsAndValues()
         makeApiRequest()
     }
-
     private fun initButtonsAndValues() {
-
         val buttonBack = view?.findViewById<ImageButton>(R.id.toChoose)
         buttonBack?.setOnClickListener {
+
+            if (::call.isInitialized) {
+                call.cancel()
+            }
+            stopFunction = true
             navController.navigate(R.id.action_countryInfo_to_chooseCountry)
         }
-
         arguments?.let { bundle ->
             selectedButtonId = bundle.getInt("buttonId", 0)
         }
     }
+
 
     private fun formatNumberWithCommas(number: Int): String {
         val numberFormat = NumberFormat.getNumberInstance(Locale.US)
@@ -175,6 +180,9 @@ class CountryInfo : Fragment() {
 
     private fun buildDesign(Country: String, CountryPhoto: String, capitalText: String, Currency: String, Neighbours: String, Population: String)
     {
+        if (stopFunction) {
+            return  // Exit the function early
+        }
         val countryNameText = view?.findViewById<TextView>(R.id.setCountry)
         val countryNameText1 = view?.findViewById<TextView>(R.id.setCountryText)
         val countryPhoto = view?.findViewById<ImageView>(R.id.countryImage)
@@ -184,15 +192,17 @@ class CountryInfo : Fragment() {
         val populationText = view?.findViewById<TextView>(R.id.setPopulation)
 
         val noNeighborsText = "No have neighbours"
-        val noCurrency = "No have own currency"
-        val noCapital = "No have own capital"
+        val noCurrency = "No own currency"
+        val noCapital = "No own capital"
 
         countryNameText?.text = Country
         countryNameText1?.text = Country
         capitalTexts?.text = capitalText
         currencyText?.text = Currency
         populationText?.text = Population
-
+        if (stopFunction) {
+            return  // Exit the function early
+        }
         checkCountryInfo("", Neighbours, neighborsText!!, noNeighborsText)
         checkCountryInfo(" ", Currency, currencyText!!, noCurrency)
         checkCountryInfo("", capitalText, capitalTexts!!, noCapital)
