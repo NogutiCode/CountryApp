@@ -22,9 +22,6 @@
         <action
             android:id="@+id/action_chooseCountry_to_countryInfo"
             app:destination="@id/countryInfo" />
-        <action
-            android:id="@+id/action_chooseCountry_to_entrance"
-            app:destination="@id/entrance" />
     </fragment>
     <fragment
         android:id="@+id/countryInfo"

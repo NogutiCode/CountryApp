@@ -20,8 +20,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        app:tint="@drawable/tint_selector" />
+        android:scaleType="fitCenter" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -40,7 +39,7 @@
         android:background="#a6a6a6" />
 
     <ScrollView
-
+        android:id="@+id/CountryScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="61dp">

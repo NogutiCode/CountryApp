@@ -1,5 +1,6 @@
 package com.example.countryapp
-
+import kotlinx.coroutines.*
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -26,14 +28,26 @@ import okhttp3.*
 import java.io.IOException
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
+import kotlin.system.exitProcess
 
 
 class ChooseCountry : Fragment() {
+    private lateinit var scrollView: ScrollView
+    private val scrollPositionKey = "scroll_position"
+    private var isApiKeyLoaded = false
+
+    private var countryList: List<Country>? = null
     private lateinit var progressBar: ProgressBar
     private lateinit var navController: NavController
+    private lateinit var layout: LinearLayout
     private lateinit var call: Call
     private var stopFunction = false
     private val client = OkHttpClient()
+
+    private var createdButtonCount = 0
+    private var totalCountryCount = 0
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +56,8 @@ class ChooseCountry : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_choose_country, container, false)
         progressBar = view.findViewById(R.id.progressBar)
+        layout = view.findViewById(R.id.listOfCountries)
+        scrollView = view.findViewById(R.id.CountryScroll)
         return view
 
     }
@@ -51,7 +67,6 @@ class ChooseCountry : Fragment() {
 
         navController = Navigation.findNavController(view)
         initValues(view)
-        makeApiRequest()
 
     }
 
@@ -62,12 +77,29 @@ class ChooseCountry : Fragment() {
                 call.cancel()
             }
             stopFunction = true
-            navController.navigate(R.id.action_chooseCountry_to_entrance)
+            activity?.finish()
+            exitProcess(0)
 
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        if (isApiKeyLoaded) {
+            restoreScrollPosition()
+        } else {
+            makeApiRequest()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        saveScrollPosition()
+    }
+
     private fun makeApiRequest() {
         progressBar.visibility = View.VISIBLE
+        layout.visibility = View.GONE
         val request = Request.Builder()
             .url("https://restcountries.com/v3.1/all")
             .build()
@@ -87,8 +119,9 @@ class ChooseCountry : Fragment() {
                         val listType =
                             Types.newParameterizedType(List::class.java, Country::class.java)
                         val adapter: JsonAdapter<List<Country>> = moshi.adapter(listType)
-                        val countryList: List<Country>? = adapter.fromJson(responseBody)
+                        countryList = adapter.fromJson(responseBody)
                         countryList?.let { list ->
+                            //totalCountryCount = list.size
                             for ((index, country) in list.withIndex()) {
                                 val name = country.name?.common
                                 val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
@@ -97,9 +130,6 @@ class ChooseCountry : Fragment() {
 
                                 activity?.runOnUiThread {
                                     buildDesign("$name \n$formattedCapital" ,"$flag", "$index")
-                                    Handler(Looper.getMainLooper()).postDelayed({
-                                    progressBar.visibility = View.GONE
-                                    }, 10)
                                 }
 
                             }
@@ -108,6 +138,7 @@ class ChooseCountry : Fragment() {
                 }
             }
         })
+
     }
 
     private fun setButtonWithImage(button: Button, text: String, image: Drawable?) {
@@ -120,7 +151,7 @@ class ChooseCountry : Fragment() {
         val imageView = ImageView(requireContext())
         val imagePadding = 75
         val btnId = ButtonId.toInt()
-
+        //loadedCountryCount++
         button.id = btnId
         button.text = textCountry
         button.isAllCaps = false
@@ -162,9 +193,35 @@ class ChooseCountry : Fragment() {
                         bundle.putInt("buttonId", btnId)
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
                     }
+                    //apiKeyLoaded() -- Возвращение скролла на место где оно было
+                    if (btnId == totalCountryCount) {
+                            progressBar.visibility = View.GONE
+                            layout.visibility = View.VISIBLE
+                    }
+
+
                 }
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
         }
+
+    private fun apiKeyLoaded() {
+        isApiKeyLoaded = true
+        restoreScrollPosition()
     }
+
+    private fun saveScrollPosition() {
+        val scrollPosition = scrollView.scrollY
+        val sharedPreferences = requireContext().getSharedPreferences("scroll_prefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putInt(scrollPositionKey, scrollPosition).apply()
+    }
+
+    private fun restoreScrollPosition() {
+        val sharedPreferences = requireContext().getSharedPreferences("scroll_prefs", Context.MODE_PRIVATE)
+        val scrollPosition = sharedPreferences.getInt(scrollPositionKey, 0)
+        scrollView.post {
+            scrollView.scrollTo(0, scrollPosition)
+        }
+    }
+}
 

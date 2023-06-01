@@ -23,7 +23,7 @@
         android:layout_height="30dp"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
-        app:tint="@drawable/tint_selector" />
+        />
 
     <TextView
         android:id="@+id/setCountry"
