@@ -1,4 +1,5 @@
 package com.example.countryapp
+
 import kotlinx.coroutines.*
 import android.content.Context
 import android.graphics.Color
@@ -11,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -34,7 +34,6 @@ import kotlin.system.exitProcess
 class ChooseCountry : Fragment() {
     private lateinit var scrollView: ScrollView
     private val scrollPositionKey = "scroll_position"
-    private var isApiKeyLoaded = false
 
     private var countryList: List<Country>? = null
     private lateinit var progressBar: ProgressBar
@@ -44,10 +43,8 @@ class ChooseCountry : Fragment() {
     private var stopFunction = false
     private val client = OkHttpClient()
 
-    private var createdButtonCount = 0
+    private var scrollPosition = 0
     private var totalCountryCount = 0
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,10 +64,11 @@ class ChooseCountry : Fragment() {
 
         navController = Navigation.findNavController(view)
         initValues(view)
+        makeApiRequest()
 
     }
 
-    private fun initValues(view: View){
+    private fun initValues(view: View) {
         val btnBack: ImageButton = view.findViewById(R.id.toEntrance)
         btnBack.setOnClickListener {
             if (::call.isInitialized) {
@@ -80,15 +78,6 @@ class ChooseCountry : Fragment() {
             activity?.finish()
             exitProcess(0)
 
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (isApiKeyLoaded) {
-            restoreScrollPosition()
-        } else {
-            makeApiRequest()
         }
     }
 
@@ -121,24 +110,26 @@ class ChooseCountry : Fragment() {
                         val adapter: JsonAdapter<List<Country>> = moshi.adapter(listType)
                         countryList = adapter.fromJson(responseBody)
                         countryList?.let { list ->
-                            //totalCountryCount = list.size
+                            totalCountryCount = list.size
                             for ((index, country) in list.withIndex()) {
+                                if (stopFunction) {
+                                    return
+                                }
                                 val name = country.name?.common
                                 val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
                                 val flag = country.flags?.png
                                 val formattedCapital = capital ?: ""
-
-                                activity?.runOnUiThread {
-                                    buildDesign("$name \n$formattedCapital" ,"$flag", "$index")
+                                activity?.runOnUiThread(){
+                                    buildButton("$name \n$formattedCapital", flag, index)
+                                    progressBar.visibility = View.GONE
+                                    layout.visibility = View.VISIBLE
                                 }
-
                             }
                         }
                     }
                 }
             }
         })
-
     }
 
     private fun setButtonWithImage(button: Button, text: String, image: Drawable?) {
@@ -146,25 +137,26 @@ class ChooseCountry : Fragment() {
         button.setCompoundDrawablesWithIntrinsicBounds(image, null, null, null)
     }
 
-    private fun buildDesign(textCountry: String, ImageLink: String, ButtonId: String) {
+    private fun buildButton(countryText: String, imageLink: String?, buttonId: Int) {
         val button = Button(requireContext())
         val imageView = ImageView(requireContext())
         val imagePadding = 75
-        val btnId = ButtonId.toInt()
-        //loadedCountryCount++
-        button.id = btnId
-        button.text = textCountry
+
+        button.id = buttonId
+        button.text = countryText
         button.isAllCaps = false
         button.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
         button.compoundDrawablePadding = imagePadding
+
         if (stopFunction) {
             return
         }
-        Glide.with(requireContext())
-            .load(ImageLink)
+
+        Glide.with(this)
+            .load(imageLink)
             .apply(RequestOptions()
                 .transform(
-                    CropCircleWithBorderTransformation(4, Color.GRAY), // Установите желаемую ширину и цвет обводки
+                    CropCircleWithBorderTransformation(4, Color.GRAY),
                     RoundedCornersTransformation(16, 0)
                 )
                 .override(200, 200)
@@ -175,52 +167,49 @@ class ChooseCountry : Fragment() {
                     resource: Drawable,
                     transition: Transition<in Drawable>?
                 ) {
-                    imageView.setImageDrawable(resource)
-                    imageView.layoutParams = ViewGroup.LayoutParams(300, 300)
                     if (stopFunction) {
                         return
                     }
+
+                    imageView.setImageDrawable(resource)
+                    imageView.layoutParams = ViewGroup.LayoutParams(300, 300)
+
                     button.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, 300
                     )
-                    val linearLayout = view?.findViewById<LinearLayout>(R.id.listOfCountries)
-                    setButtonWithImage(button, textCountry, imageView.drawable)
+
+                    val linearLayout = requireView().findViewById<LinearLayout>(R.id.listOfCountries)
+                    setButtonWithImage(button, countryText, imageView.drawable)
                     button.background = ColorDrawable(Color.TRANSPARENT)
 
                     linearLayout?.addView(button)
-                    val bundle = Bundle()
+
                     button.setOnClickListener {
-                        bundle.putInt("buttonId", btnId)
+                        val bundle = Bundle().apply { putInt("buttonId", buttonId) }
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
                     }
-                    //apiKeyLoaded() -- Возвращение скролла на место где оно было
-                    if (btnId == totalCountryCount) {
-                            progressBar.visibility = View.GONE
-                            layout.visibility = View.VISIBLE
-                    }
-
-
+                    //restoreScrollPosition() //scroll который запоминает где ты был в прошлый раз
                 }
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
-        }
-
-    private fun apiKeyLoaded() {
-        isApiKeyLoaded = true
-        restoreScrollPosition()
     }
 
+
+
     private fun saveScrollPosition() {
-        val scrollPosition = scrollView.scrollY
+        scrollPosition = scrollView.scrollY
         val sharedPreferences = requireContext().getSharedPreferences("scroll_prefs", Context.MODE_PRIVATE)
         sharedPreferences.edit().putInt(scrollPositionKey, scrollPosition).apply()
     }
 
     private fun restoreScrollPosition() {
-        val sharedPreferences = requireContext().getSharedPreferences("scroll_prefs", Context.MODE_PRIVATE)
+        val sharedPreferences =
+            requireContext().getSharedPreferences("scroll_prefs", Context.MODE_PRIVATE)
         val scrollPosition = sharedPreferences.getInt(scrollPositionKey, 0)
         scrollView.post {
             scrollView.scrollTo(0, scrollPosition)
+                progressBar.visibility = View.GONE
+                layout.visibility = View.VISIBLE
         }
     }
 }
