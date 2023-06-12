@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
     var scrollPosition: Int = 0
+    var buttonOrder: MutableList<Int> = mutableListOf()
     private val repository = CountryRepository()
     val countryListLiveData: MutableLiveData<List<Country>> by lazy {
         MutableLiveData<List<Country>>()

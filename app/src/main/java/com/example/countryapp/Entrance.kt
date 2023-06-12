@@ -11,10 +11,10 @@ import android.widget.Button
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import dagger.hilt.android.AndroidEntryPoint
 
 
-@AndroidEntryPoint
+
+
 class EntranceFragment : Fragment() {
     private lateinit var navController: NavController
     private lateinit var sharedPreferences: SharedPreferences

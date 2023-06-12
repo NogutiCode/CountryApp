@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -54,6 +55,8 @@ class ChooseCountryFragment : Fragment() {
         initValues(view)
         setupCountryListObserver()
         fetchCountryList()
+
+
     }
 
     private fun initValues(view: View) {
@@ -75,35 +78,35 @@ class ChooseCountryFragment : Fragment() {
     }
 
     private fun setupCountryListObserver() {
+        progressBar.visibility = View.VISIBLE
+        layout.visibility = View.GONE
+
         vm.countryListLiveData.observe(viewLifecycleOwner) { countryList ->
             totalCountryCount = countryList.size
-            clearButtons()
-            for ((index, country) in countryList.withIndex()) {
-                if (stopFunction) {
-                    return@observe
+            if (buttons.isEmpty()) {
+                for ((index, country) in countryList.withIndex()) {
+                    if (stopFunction) {
+                        return@observe
+                    }
+
+                    val name = country.name?.common
+                    val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
+                    val flag = country.flags?.png
+                    val formattedCapital = capital ?: ""
+
+                    buildButton("$name \n$formattedCapital", flag, index)
                 }
-                val name = country.name?.common
-                val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
-                val flag = country.flags?.png
-                val formattedCapital = capital ?: ""
-                buildButton("$name \n$formattedCapital", flag, index)
             }
 
-            progressBar.visibility = View.GONE
-            layout.visibility = View.VISIBLE
         }
-    }
-    private fun clearButtons() {
-        buttons.forEach { button ->
-            layout.removeView(button)
-        }
-        buttons.clear()
     }
     private fun fetchCountryList() {
         progressBar.visibility = View.VISIBLE
         layout.visibility = View.GONE
+        buttons.clear()
         vm.fetchCountryList()
     }
+
 
     private fun setButtonWithImage(button: Button, text: String, image: Drawable?) {
         button.text = text
@@ -158,11 +161,20 @@ class ChooseCountryFragment : Fragment() {
 
                     buttons.add(button)
                     layout.addView(button)
+
                     button.setOnClickListener {
                         val bundle = Bundle().apply { putInt("buttonId", buttonId) }
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
                     }
-                    //restoreScrollPosition() //scroll который запоминает где ты был в прошлый раз
+
+                    if(totalCountryCount == layout.size){
+                        activity?.runOnUiThread(){
+                            restoreScrollPosition()//scroll который запоминает где ты был в прошлый раз
+                            progressBar.visibility = View.GONE
+                            layout.visibility = View.VISIBLE
+                        }
+                    }
+
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {}
