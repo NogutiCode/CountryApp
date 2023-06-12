@@ -9,24 +9,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import okhttp3.*
-import java.io.IOException
 import java.text.NumberFormat
 import java.util.*
 
 
-class CountryInfo : Fragment() {
 
+class CountryInfoFragment : Fragment() {
+    private lateinit var vm: MainViewModel
     private var selectedButtonId: Int = 0
     private lateinit var progressBar: ProgressBar
     private lateinit var layout: LinearLayout
@@ -34,41 +31,44 @@ class CountryInfo : Fragment() {
     private lateinit var navController: NavController
     private lateinit var call: Call
     private var stopFunction = false
-    private val client = OkHttpClient()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         val view = inflater.inflate(R.layout.fragment_country_info, container, false)
         layout = view.findViewById(R.id.listOfCountries)
         setCountry = view.findViewById(R.id.setCountry)
         progressBar = view.findViewById(R.id.progressBar)
+        vm = ViewModelProvider(this)[MainViewModel::class.java]
         return view
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
-
         initButtonsAndValues()
-        makeApiRequest()
+        setupCountryListObserver()
+        fetchCountryList()
+
+
     }
+
     private fun initButtonsAndValues() {
         val buttonBack = view?.findViewById<ImageButton>(R.id.toChoose)
         buttonBack?.setOnClickListener {
-
             if (::call.isInitialized) {
                 call.cancel()
             }
             stopFunction = true
-            navController.navigate(R.id.action_countryInfo_to_chooseCountry)
+            //navController.popBackStack(R.id.chooseCountry, false)
+            navController.navigateUp()
+            //navController.navigate(R.id.action_countryInfo_to_chooseCountry)
         }
         arguments?.let { bundle ->
             selectedButtonId = bundle.getInt("buttonId", 0)
         }
+
     }
 
 
@@ -77,100 +77,87 @@ class CountryInfo : Fragment() {
         return numberFormat.format(number)
     }
 
-    private fun makeApiRequest() {
+    private fun setupCountryListObserver() {
+        vm.countryListLiveData.observe(viewLifecycleOwner) { countryList ->
+            processCountryList(countryList)
+            progressBar.visibility = View.GONE
+            layout.visibility = View.VISIBLE
+        }
+    }
 
+    private fun fetchCountryList() {
         progressBar.visibility = View.VISIBLE
         layout.visibility = View.GONE
-        setCountry.visibility = View.GONE
+        vm.fetchCountryList()
+    }
 
-        val request = Request.Builder()
-            .url("https://restcountries.com/v3.1/all")
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
 
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-                    val responseBody = response.body?.string()
-                    if (responseBody != null) {
-                        val moshi = Moshi.Builder()
-                            .addLast(KotlinJsonAdapterFactory())
-                            .build()
-                        val listType =
-                            Types.newParameterizedType(List::class.java, Country::class.java)
-                        val adapter: JsonAdapter<List<Country>> = moshi.adapter(listType)
-                        val countryList: List<Country>? = adapter.fromJson(responseBody)
-                        countryList?.let { list ->
-                            for ((index, country) in list.withIndex()) {
+    private fun processCountryList(countryList: List<Country>) {
+        for ((index, country) in countryList.withIndex()) {
+            val nameCountry = country.name?.common.toString()
+            val arrayNames = countryList.map { it.name?.common }.toTypedArray()
+            val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
+            val formattedCapital = capital ?: ""
+            val flag = country.flags?.png.toString()
 
-                                val nameCountry = country.name?.common.toString()
-                                val arrayNames = list.map { it.name?.common }.toTypedArray()
-                                val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
-                                val formattedCapital = capital ?: ""
-                                val flag = country.flags?.png.toString()
+            val currencyFindFullName = country.currencies?.values?.firstOrNull()
+            val currencyFullName: String? = currencyFindFullName?.name
+            val currencyFindSmallName = country.currencies?.toList()?.firstOrNull()
+            val currencySmallName: String? = currencyFindSmallName?.first
+            val formattedCurrencySmallName = currencySmallName ?: ""
+            val formattedCurrencyFullName = currencyFullName ?: ""
 
-                                val currencyFindFullName = country.currencies?.values?.firstOrNull()
-                                val currencyFullName: String? = currencyFindFullName?.name
-                                val currencyFindSmallName = country.currencies?.toList()?.firstOrNull()
-                                val currencySmallName: String? = currencyFindSmallName?.first
-                                val formattedCurrencySmallName = currencySmallName ?: ""
-                                val formattedCurrencyFullName = currencyFullName ?: ""
+            val population = country.population.toString()
+            val formattedPopulation = formatNumberWithCommas(population.toInt())
 
-                                val population = country.population.toString()
-                                val formattedPopulation = formatNumberWithCommas(population.toInt())
+            val borders = country.borders?.toString()?.replace("[", "")?.replace("]", "")
+            val withoutBracketsBorders = borders ?: ""
+            val withoutComma = withoutBracketsBorders.split(", ")
+            val arrayBorders = withoutComma.toTypedArray()
 
-                                val borders = country.borders?.toString()?.replace("[", "")?.replace("]", "")
-                                val withoutBracketsBorders = borders ?: ""
-                                val withoutComa = withoutBracketsBorders.split(", ")
-                                val arrayBorders = withoutComa.toTypedArray()
+            val arrayFifa = countryList.map { it.cca3 }.toTypedArray()
 
-                                val arrayFifa = list.map { it.cca3 }.toTypedArray()
-
-                                val builder = StringBuilder()
-                                if (index == selectedButtonId) {
-                                    for (i in arrayFifa.indices) {
-                                        for (element in arrayBorders) {
-                                            if (element == arrayFifa[i]) {
-                                                if (builder.isNotEmpty()) {
-                                                    builder.append(", ")
-                                                }
-                                                builder.append(arrayNames[i])
-                                            }
-                                        }
-                                    }
-                                    val listNeighbors = builder.toString()
-                                    println("Name:; $listNeighbors $nameCountry ::: $formattedCapital ::: $flag ::: $currencySmallName $currencyFullName  ::: $formattedPopulation ::: ")
-                                    activity?.runOnUiThread {
-
-                                        buildDesign(
-                                            nameCountry,
-                                            flag,
-                                            formattedCapital,
-                                            "$formattedCurrencySmallName $formattedCurrencyFullName",
-                                            listNeighbors,
-                                            formattedPopulation
-                                        )
-                                        Handler(Looper.getMainLooper()).postDelayed({
-                                            progressBar.visibility = View.GONE
-                                            layout.visibility = View.VISIBLE
-                                            setCountry.visibility = View.VISIBLE
-
-                                        }, 50)
-                                    }
-                                }
+            val builder = StringBuilder()
+            if (index == selectedButtonId) {
+                for (i in arrayFifa.indices) {
+                    for (element in arrayBorders) {
+                        if (element == arrayFifa[i]) {
+                            if (builder.isNotEmpty()) {
+                                builder.append(", ")
                             }
+                            builder.append(arrayNames[i])
                         }
                     }
                 }
+                val listNeighbors = builder.toString()
+                println("Name:; $listNeighbors $nameCountry ::: $formattedCapital ::: $flag ::: $currencySmallName $currencyFullName  ::: $formattedPopulation ::: ")
+                activity?.runOnUiThread {
+                    buildDesign(
+                        nameCountry,
+                        flag,
+                        formattedCapital,
+                        "$formattedCurrencySmallName $formattedCurrencyFullName",
+                        listNeighbors,
+                        formattedPopulation
+                    )
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        progressBar.visibility = View.GONE
+                        layout.visibility = View.VISIBLE
+                        setCountry.visibility = View.VISIBLE
+                    }, 50)
+                }
             }
-        })
+        }
     }
 
-    private fun checkCountryInfo(CheckType: String, TextCheck: String, TextVar: TextView, IfNoSomething: String)
-    {
+
+    private fun checkCountryInfo(
+        CheckType: String,
+        TextCheck: String,
+        TextVar: TextView,
+        IfNoSomething: String
+    ) {
         if (TextCheck == CheckType) {
             TextVar.text = IfNoSomething
         } else {
@@ -178,10 +165,16 @@ class CountryInfo : Fragment() {
         }
     }
 
-    private fun buildDesign(Country: String, CountryPhoto: String, capitalText: String, Currency: String, Neighbours: String, Population: String)
-    {
+    private fun buildDesign(
+        Country: String,
+        CountryPhoto: String,
+        capitalText: String,
+        Currency: String,
+        Neighbours: String,
+        Population: String
+    ) {
         if (stopFunction) {
-            return  // Exit the function early
+            return
         }
         val countryNameText = view?.findViewById<TextView>(R.id.setCountry)
         val countryNameText1 = view?.findViewById<TextView>(R.id.setCountryText)
@@ -201,7 +194,7 @@ class CountryInfo : Fragment() {
         currencyText?.text = Currency
         populationText?.text = Population
         if (stopFunction) {
-            return  // Exit the function early
+            return
         }
         checkCountryInfo("", Neighbours, neighborsText!!, noNeighborsText)
         checkCountryInfo(" ", Currency, currencyText!!, noCurrency)
@@ -216,7 +209,7 @@ class CountryInfo : Fragment() {
                             CropCircleWithBorderTransformation(
                                 4,
                                 Color.GRAY
-                            ), // Установите желаемую ширину и цвет обводки
+                            ),
                             RoundedCornersTransformation(16, 0)
                         )
                         .override(500, 500)

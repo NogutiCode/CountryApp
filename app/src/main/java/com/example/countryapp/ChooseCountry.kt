@@ -1,18 +1,15 @@
 package com.example.countryapp
 
-import kotlinx.coroutines.*
-import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
@@ -20,32 +17,22 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.*
-import java.io.IOException
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import kotlin.system.exitProcess
 
 
-class ChooseCountry : Fragment() {
+class ChooseCountryFragment : Fragment() {
     private lateinit var scrollView: ScrollView
-    private val scrollPositionKey = "scroll_position"
-
-    private var countryList: List<Country>? = null
     private lateinit var progressBar: ProgressBar
     private lateinit var navController: NavController
     private lateinit var layout: LinearLayout
     private lateinit var call: Call
     private var stopFunction = false
-    private val client = OkHttpClient()
-
-    private var scrollPosition = 0
     private var totalCountryCount = 0
-
+    private lateinit var vm: MainViewModel
+    private val buttons = mutableListOf<Button>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,6 +42,7 @@ class ChooseCountry : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         layout = view.findViewById(R.id.listOfCountries)
         scrollView = view.findViewById(R.id.CountryScroll)
+        vm = ViewModelProvider(this)[MainViewModel::class.java]
         return view
 
     }
@@ -64,8 +52,8 @@ class ChooseCountry : Fragment() {
 
         navController = Navigation.findNavController(view)
         initValues(view)
-        makeApiRequest()
-
+        setupCountryListObserver()
+        fetchCountryList()
     }
 
     private fun initValues(view: View) {
@@ -86,50 +74,35 @@ class ChooseCountry : Fragment() {
         saveScrollPosition()
     }
 
-    private fun makeApiRequest() {
-        progressBar.visibility = View.VISIBLE
-        layout.visibility = View.GONE
-        val request = Request.Builder()
-            .url("https://restcountries.com/v3.1/all")
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
+    private fun setupCountryListObserver() {
+        vm.countryListLiveData.observe(viewLifecycleOwner) { countryList ->
+            totalCountryCount = countryList.size
+            clearButtons()
+            for ((index, country) in countryList.withIndex()) {
+                if (stopFunction) {
+                    return@observe
+                }
+                val name = country.name?.common
+                val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
+                val flag = country.flags?.png
+                val formattedCapital = capital ?: ""
+                buildButton("$name \n$formattedCapital", flag, index)
             }
 
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-                    val responseBody = response.body?.string()
-                    if (responseBody != null) {
-                        val moshi = Moshi.Builder()
-                            .addLast(KotlinJsonAdapterFactory())
-                            .build()
-                        val listType =
-                            Types.newParameterizedType(List::class.java, Country::class.java)
-                        val adapter: JsonAdapter<List<Country>> = moshi.adapter(listType)
-                        countryList = adapter.fromJson(responseBody)
-                        countryList?.let { list ->
-                            totalCountryCount = list.size
-                            for ((index, country) in list.withIndex()) {
-                                if (stopFunction) {
-                                    return
-                                }
-                                val name = country.name?.common
-                                val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
-                                val flag = country.flags?.png
-                                val formattedCapital = capital ?: ""
-                                activity?.runOnUiThread(){
-                                    buildButton("$name \n$formattedCapital", flag, index)
-                                    progressBar.visibility = View.GONE
-                                    layout.visibility = View.VISIBLE
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        })
+            progressBar.visibility = View.GONE
+            layout.visibility = View.VISIBLE
+        }
+    }
+    private fun clearButtons() {
+        buttons.forEach { button ->
+            layout.removeView(button)
+        }
+        buttons.clear()
+    }
+    private fun fetchCountryList() {
+        progressBar.visibility = View.VISIBLE
+        layout.visibility = View.GONE
+        vm.fetchCountryList()
     }
 
     private fun setButtonWithImage(button: Button, text: String, image: Drawable?) {
@@ -154,12 +127,13 @@ class ChooseCountry : Fragment() {
 
         Glide.with(this)
             .load(imageLink)
-            .apply(RequestOptions()
-                .transform(
-                    CropCircleWithBorderTransformation(4, Color.GRAY),
-                    RoundedCornersTransformation(16, 0)
-                )
-                .override(200, 200)
+            .apply(
+                RequestOptions()
+                    .transform(
+                        CropCircleWithBorderTransformation(4, Color.GRAY),
+                        RoundedCornersTransformation(16, 0)
+                    )
+                    .override(200, 200)
             )
             .transition(DrawableTransitionOptions.withCrossFade())
             .into(object : CustomTarget<Drawable>() {
@@ -178,38 +152,33 @@ class ChooseCountry : Fragment() {
                         LinearLayout.LayoutParams.MATCH_PARENT, 300
                     )
 
-                    val linearLayout = requireView().findViewById<LinearLayout>(R.id.listOfCountries)
+                    requireView().findViewById<LinearLayout>(R.id.listOfCountries)
                     setButtonWithImage(button, countryText, imageView.drawable)
                     button.background = ColorDrawable(Color.TRANSPARENT)
 
-                    linearLayout?.addView(button)
-
+                    buttons.add(button)
+                    layout.addView(button)
                     button.setOnClickListener {
                         val bundle = Bundle().apply { putInt("buttonId", buttonId) }
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
                     }
                     //restoreScrollPosition() //scroll который запоминает где ты был в прошлый раз
                 }
+
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
     }
 
 
-
     private fun saveScrollPosition() {
-        scrollPosition = scrollView.scrollY
-        val sharedPreferences = requireContext().getSharedPreferences("scroll_prefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putInt(scrollPositionKey, scrollPosition).apply()
+        vm.scrollPosition = scrollView.scrollY
     }
 
     private fun restoreScrollPosition() {
-        val sharedPreferences =
-            requireContext().getSharedPreferences("scroll_prefs", Context.MODE_PRIVATE)
-        val scrollPosition = sharedPreferences.getInt(scrollPositionKey, 0)
         scrollView.post {
-            scrollView.scrollTo(0, scrollPosition)
-                progressBar.visibility = View.GONE
-                layout.visibility = View.VISIBLE
+            scrollView.scrollTo(0, vm.scrollPosition)
+            progressBar.visibility = View.GONE
+            layout.visibility = View.VISIBLE
         }
     }
 }
