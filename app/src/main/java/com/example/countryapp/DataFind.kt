@@ -1,6 +1,6 @@
 package com.example.countryapp
 
-data class ButtonState(val text: String)
+
 data class Country(
     val name: Name?,
     val capital: Any?,

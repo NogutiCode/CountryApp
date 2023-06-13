@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -18,13 +19,15 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import dagger.hilt.android.AndroidEntryPoint
 import okhttp3.*
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import kotlin.system.exitProcess
 
-
-class ChooseCountryFragment : Fragment() {
+@AndroidEntryPoint
+class ChooseCountryFragment: Fragment(){
+    private val vm: MainViewModel by viewModels()
     private lateinit var scrollView: ScrollView
     private lateinit var progressBar: ProgressBar
     private lateinit var navController: NavController
@@ -32,7 +35,7 @@ class ChooseCountryFragment : Fragment() {
     private lateinit var call: Call
     private var stopFunction = false
     private var totalCountryCount = 0
-    private lateinit var vm: MainViewModel
+
     private val buttons = mutableListOf<Button>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,7 +46,7 @@ class ChooseCountryFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         layout = view.findViewById(R.id.listOfCountries)
         scrollView = view.findViewById(R.id.CountryScroll)
-        vm = ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(this)[MainViewModel::class.java]
         return view
 
     }
@@ -166,7 +169,6 @@ class ChooseCountryFragment : Fragment() {
                         val bundle = Bundle().apply { putInt("buttonId", buttonId) }
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
                     }
-
                     if(totalCountryCount == layout.size){
                         activity?.runOnUiThread(){
                             restoreScrollPosition()//scroll который запоминает где ты был в прошлый раз
@@ -174,12 +176,10 @@ class ChooseCountryFragment : Fragment() {
                             layout.visibility = View.VISIBLE
                         }
                     }
-
                 }
-
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
-    }
+        }
 
 
     private fun saveScrollPosition() {

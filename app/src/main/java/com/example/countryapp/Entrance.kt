@@ -11,13 +11,14 @@ import android.widget.Button
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-
-
-
+@AndroidEntryPoint
 class EntranceFragment : Fragment() {
     private lateinit var navController: NavController
-    private lateinit var sharedPreferences: SharedPreferences
+    @Inject
+    lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

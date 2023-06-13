@@ -9,11 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 import okhttp3.*
@@ -22,8 +24,10 @@ import java.util.*
 
 
 
-class CountryInfoFragment : Fragment() {
-    private lateinit var vm: MainViewModel
+@AndroidEntryPoint
+class CountryInfoFragment: Fragment() {
+
+    private val vm: MainViewModel by viewModels()
     private var selectedButtonId: Int = 0
     private lateinit var progressBar: ProgressBar
     private lateinit var layout: LinearLayout
@@ -40,7 +44,7 @@ class CountryInfoFragment : Fragment() {
         layout = view.findViewById(R.id.listOfCountries)
         setCountry = view.findViewById(R.id.setCountry)
         progressBar = view.findViewById(R.id.progressBar)
-        vm = ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(this)[MainViewModel::class.java]
         return view
     }
 

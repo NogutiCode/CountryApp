@@ -4,13 +4,15 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor() : ViewModel() {
     var scrollPosition: Int = 0
-    var buttonOrder: MutableList<Int> = mutableListOf()
     private val repository = CountryRepository()
     val countryListLiveData: MutableLiveData<List<Country>> by lazy {
         MutableLiveData<List<Country>>()
