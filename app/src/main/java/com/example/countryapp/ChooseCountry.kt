@@ -100,7 +100,6 @@ class ChooseCountryFragment: Fragment(){
                     buildButton("$name \n$formattedCapital", flag, index)
                 }
             }
-
         }
     }
     private fun fetchCountryList() {

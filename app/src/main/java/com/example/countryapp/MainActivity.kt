@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView)
         val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
-
         if (currentFragment is ChooseCountryFragment) {
             finish()
         } else {
