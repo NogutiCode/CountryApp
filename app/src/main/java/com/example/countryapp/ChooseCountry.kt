@@ -116,7 +116,6 @@ class ChooseCountryFragment: Fragment(){
         layout.removeAllViews()
         buttons.clear()
     }
-
     private fun setupCountryListObserver() {
         progressBar.visibility = View.VISIBLE
         layout.visibility = View.GONE
@@ -139,7 +138,6 @@ class ChooseCountryFragment: Fragment(){
             }
         }
     }
-
     private fun fetchCountryList() {
         progressBar.visibility = View.VISIBLE
         layout.visibility = View.GONE
@@ -210,6 +208,7 @@ class ChooseCountryFragment: Fragment(){
                     }
                     if(totalCountryCount == layout.size){
                             restoreScrollPosition()
+                            restoreButtonOrder()
                             progressBar.visibility = View.GONE
                             layout.visibility = View.VISIBLE//scroll который запоминает где ты был в прошлый раз
                         }
@@ -217,7 +216,15 @@ class ChooseCountryFragment: Fragment(){
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
         }
-
+    private fun restoreButtonOrder() {
+        val orderedButtons = buttons.sortedBy { it.id }
+        layout.removeAllViews()
+        buttons.clear()
+        for (button in orderedButtons) {
+            layout.addView(button)
+            buttons.add(button)
+        }
+    }
 
     private fun saveScrollPosition() {
         vm.scrollPosition = scrollView.scrollY
