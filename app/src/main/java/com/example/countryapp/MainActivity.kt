@@ -4,11 +4,9 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.system.exitProcess
 
 
-
-
-@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
         if (currentFragment is ChooseCountryFragment) {
             finish()
+            exitProcess(0)
         } else {
             val intent = Intent(this, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)

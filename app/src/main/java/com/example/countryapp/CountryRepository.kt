@@ -35,7 +35,6 @@ class CountryRepository {
                 Thread.sleep(1000)
             }
         }
-
         return countryList
     }
 }

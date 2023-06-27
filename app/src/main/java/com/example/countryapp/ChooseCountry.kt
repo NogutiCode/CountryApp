@@ -23,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import okhttp3.*
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
+import java.util.Locale
 import kotlin.system.exitProcess
 
 @AndroidEntryPoint
@@ -32,6 +33,7 @@ class ChooseCountryFragment: Fragment(){
     private lateinit var progressBar: ProgressBar
     private lateinit var navController: NavController
     private lateinit var layout: LinearLayout
+    private lateinit var searchView: SearchView
     private lateinit var call: Call
     private var stopFunction = false
     private var totalCountryCount = 0
@@ -46,7 +48,9 @@ class ChooseCountryFragment: Fragment(){
         progressBar = view.findViewById(R.id.progressBar)
         layout = view.findViewById(R.id.listOfCountries)
         scrollView = view.findViewById(R.id.CountryScroll)
+        searchView = view.findViewById(R.id.SearchView)
         ViewModelProvider(this)[MainViewModel::class.java]
+
         return view
 
     }
@@ -58,9 +62,38 @@ class ChooseCountryFragment: Fragment(){
         initValues(view)
         setupCountryListObserver()
         fetchCountryList()
-
-
+        searchCountry()
     }
+
+    private fun searchCountry(){
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                performSearch(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                performSearch(newText)
+                return false
+            }
+        })
+    }
+
+    private fun performSearch(query: String) {
+        val lowercaseQuery = query.lowercase(Locale.getDefault())
+        for (i in 0 until layout.childCount) {
+            val childView = layout.getChildAt(i)
+            if (childView is Button) {
+                val buttonText = childView.text.toString().lowercase(Locale.getDefault())
+                if (lowercaseQuery.isBlank() || buttonText.contains(lowercaseQuery)) {
+                    childView.visibility = View.VISIBLE
+                } else {
+                    childView.visibility = View.GONE
+                }
+            }
+        }
+    }
+
 
     private fun initValues(view: View) {
         val btnBack: ImageButton = view.findViewById(R.id.toEntrance)
@@ -79,6 +112,10 @@ class ChooseCountryFragment: Fragment(){
         super.onPause()
         saveScrollPosition()
     }
+    private fun clearButtons() {
+        layout.removeAllViews()
+        buttons.clear()
+    }
 
     private fun setupCountryListObserver() {
         progressBar.visibility = View.VISIBLE
@@ -87,11 +124,11 @@ class ChooseCountryFragment: Fragment(){
         vm.countryListLiveData.observe(viewLifecycleOwner) { countryList ->
             totalCountryCount = countryList.size
             if (buttons.isEmpty()) {
+                clearButtons()
                 for ((index, country) in countryList.withIndex()) {
                     if (stopFunction) {
                         return@observe
                     }
-
                     val name = country.name?.common
                     val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
                     val flag = country.flags?.png
@@ -102,12 +139,14 @@ class ChooseCountryFragment: Fragment(){
             }
         }
     }
+
     private fun fetchCountryList() {
         progressBar.visibility = View.VISIBLE
         layout.visibility = View.GONE
         buttons.clear()
         vm.fetchCountryList()
     }
+
 
 
     private fun setButtonWithImage(button: Button, text: String, image: Drawable?) {
@@ -161,21 +200,20 @@ class ChooseCountryFragment: Fragment(){
                     setButtonWithImage(button, countryText, imageView.drawable)
                     button.background = ColorDrawable(Color.TRANSPARENT)
 
-                    buttons.add(button)
                     layout.addView(button)
+                    buttons.add(button)
+
 
                     button.setOnClickListener {
                         val bundle = Bundle().apply { putInt("buttonId", buttonId) }
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
                     }
                     if(totalCountryCount == layout.size){
-                        activity?.runOnUiThread(){
-                            restoreScrollPosition()//scroll который запоминает где ты был в прошлый раз
+                            restoreScrollPosition()
                             progressBar.visibility = View.GONE
-                            layout.visibility = View.VISIBLE
+                            layout.visibility = View.VISIBLE//scroll который запоминает где ты был в прошлый раз
                         }
                     }
-                }
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
         }
@@ -188,8 +226,6 @@ class ChooseCountryFragment: Fragment(){
     private fun restoreScrollPosition() {
         scrollView.post {
             scrollView.scrollTo(0, vm.scrollPosition)
-            progressBar.visibility = View.GONE
-            layout.visibility = View.VISIBLE
         }
     }
 }

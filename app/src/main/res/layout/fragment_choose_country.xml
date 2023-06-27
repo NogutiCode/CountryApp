@@ -20,7 +20,8 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@android:color/transparent"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        app:tint="@color/lightPurple_200" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -59,12 +60,13 @@
     </ScrollView>
 
     <SearchView
+        android:id="@+id/SearchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="180dp"
-        android:queryBackground="@android:color/white"
+        android:queryBackground="@android:color/transparent"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layoutDirection="rtl"
         android:textSize="25sp" />

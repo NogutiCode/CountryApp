@@ -44,6 +44,7 @@ class CountryInfoFragment: Fragment() {
         layout = view.findViewById(R.id.listOfCountries)
         setCountry = view.findViewById(R.id.setCountry)
         progressBar = view.findViewById(R.id.progressBar)
+
         ViewModelProvider(this)[MainViewModel::class.java]
         return view
     }
@@ -55,8 +56,8 @@ class CountryInfoFragment: Fragment() {
         setupCountryListObserver()
         fetchCountryList()
 
-
     }
+
 
     private fun initButtonsAndValues() {
         val buttonBack = view?.findViewById<ImageButton>(R.id.toChoose)
@@ -65,14 +66,13 @@ class CountryInfoFragment: Fragment() {
                 call.cancel()
             }
             stopFunction = true
-            //navController.popBackStack(R.id.chooseCountry, false)
             navController.navigateUp()
+
             //navController.navigate(R.id.action_countryInfo_to_chooseCountry)
         }
         arguments?.let { bundle ->
             selectedButtonId = bundle.getInt("buttonId", 0)
         }
-
     }
 
 

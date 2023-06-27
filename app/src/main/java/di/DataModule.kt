@@ -24,4 +24,5 @@ object DataModule {
     fun provideCountryRepository(): CountryRepository {
         return CountryRepository()
     }
+
 }
