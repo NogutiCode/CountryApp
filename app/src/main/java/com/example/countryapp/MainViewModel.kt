@@ -15,10 +15,10 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private val repository = CountryRepository()
 
 
-
     val countryListLiveData: MutableLiveData<List<Country>> by lazy {
         MutableLiveData<List<Country>>()
     }
+
     fun fetchCountryList() {
         viewModelScope.launch {
             val countryList = withContext(Dispatchers.IO) {

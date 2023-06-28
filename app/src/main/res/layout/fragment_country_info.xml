@@ -5,8 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/countryInfo"
-    android:name="com.example.CountryInfoFragment"
-    tools:context=".CountryInfo">
+    android:name="com.example.CountryInfoFragment">
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -103,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#a6a6a6" />
+                android:background="#4942E4" />
 
             <TextView
                 android:layout_marginStart="15dp"
@@ -134,7 +133,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#a6a6a6" />
+                android:background="#4942E4" />
 
             <TextView
                 android:layout_marginStart="15dp"
@@ -164,7 +163,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#a6a6a6" />
+                android:background="#4942E4" />
 
             <TextView
                 android:layout_marginStart="15dp"
@@ -194,7 +193,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#a6a6a6" />
+                android:background="#4942E4" />
         </LinearLayout>
 
     </ScrollView>

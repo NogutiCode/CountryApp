@@ -5,4 +5,9 @@
         <item name="android:scrollbarFadeDuration">0</item>
         <item name="android:fadeScrollbars">false</item>
     </style>
+    <style name="CustomSearchViewStyle" parent="Widget.AppCompat.SearchView">
+        <item name="queryBackground">@android:color/transparent</item>
+        <item name="searchIcon">@drawable/searchicon</item>
+        <item name="closeIcon">@null</item>
+    </style>
 </resources>

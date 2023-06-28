@@ -17,6 +17,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class EntranceFragment : Fragment() {
     private lateinit var navController: NavController
+
     @Inject
     lateinit var sharedPreferences: SharedPreferences
 
@@ -36,7 +37,7 @@ class EntranceFragment : Fragment() {
 
     }
 
-    private fun initFirstLaunch(){
+    private fun initFirstLaunch() {
         sharedPreferences = requireContext().getSharedPreferences("entrance", Context.MODE_PRIVATE)
         val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
 
@@ -50,6 +51,7 @@ class EntranceFragment : Fragment() {
             navController.navigate(R.id.action_entrance_to_chooseCountry)
         }
     }
+
     private fun initButton(view: View) {
         val btn: Button = view.findViewById(R.id.toChoose)
         btn.setOnClickListener {

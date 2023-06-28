@@ -19,6 +19,7 @@ object DataModule {
     fun provideSharedPreferences(application: Application): SharedPreferences {
         return application.getSharedPreferences("entrance", Context.MODE_PRIVATE)
     }
+
     @Provides
     @Singleton
     fun provideCountryRepository(): CountryRepository {

@@ -11,9 +11,10 @@ data class Country(
     val cca3: Any?
 
 )
+
 data class Currency(
     val name: String?,
-    )
+)
 
 data class Flags(
     val png: String?,

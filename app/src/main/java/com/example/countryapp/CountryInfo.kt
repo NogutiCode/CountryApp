@@ -23,9 +23,8 @@ import java.text.NumberFormat
 import java.util.*
 
 
-
 @AndroidEntryPoint
-class CountryInfoFragment: Fragment() {
+class CountryInfoFragment : Fragment() {
 
     private val vm: MainViewModel by viewModels()
     private var selectedButtonId: Int = 0
@@ -212,7 +211,7 @@ class CountryInfoFragment: Fragment() {
                         .transform(
                             CropCircleWithBorderTransformation(
                                 4,
-                                Color.GRAY
+                                Color.parseColor("#4942E4")
                             ),
                             RoundedCornersTransformation(16, 0)
                         )

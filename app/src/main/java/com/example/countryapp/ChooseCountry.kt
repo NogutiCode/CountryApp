@@ -27,13 +27,15 @@ import java.util.Locale
 import kotlin.system.exitProcess
 
 @AndroidEntryPoint
-class ChooseCountryFragment: Fragment(){
+class ChooseCountryFragment : Fragment() {
     private val vm: MainViewModel by viewModels()
+    private val scrollPositionToSeeBtn = 1000
     private lateinit var scrollView: ScrollView
     private lateinit var progressBar: ProgressBar
     private lateinit var navController: NavController
     private lateinit var layout: LinearLayout
     private lateinit var searchView: SearchView
+    private lateinit var scrollBtn: ImageButton
     private lateinit var call: Call
     private var stopFunction = false
     private var totalCountryCount = 0
@@ -49,6 +51,7 @@ class ChooseCountryFragment: Fragment(){
         layout = view.findViewById(R.id.listOfCountries)
         scrollView = view.findViewById(R.id.CountryScroll)
         searchView = view.findViewById(R.id.SearchView)
+        scrollBtn = view.findViewById(R.id.InvisibleBtn)
         ViewModelProvider(this)[MainViewModel::class.java]
 
         return view
@@ -63,9 +66,47 @@ class ChooseCountryFragment: Fragment(){
         setupCountryListObserver()
         fetchCountryList()
         searchCountry()
+        scrollDownOrUp()
     }
 
-    private fun searchCountry(){
+    private fun initValues(view: View) {
+        val btnBack: ImageButton = view.findViewById(R.id.toEntrance)
+        btnBack.setOnClickListener {
+            if (::call.isInitialized) {
+                call.cancel()
+            }
+            stopFunction = true
+            activity?.finish()
+            exitProcess(0)
+        }
+    }
+
+    private fun scrollDownOrUp() {
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            if (scrollView.scrollY > scrollPositionToSeeBtn) {
+                scrollBtn.visibility = View.VISIBLE
+                scrollBtn.rotation = 270f
+                scrollBtn.setOnClickListener {
+                    scrollView.post {
+                        scrollView.fullScroll(ScrollView.FOCUS_DOWN)
+                    }
+                }
+            }
+
+            val maxScrollY = scrollView.getChildAt(0).measuredHeight - scrollView.measuredHeight
+            println(maxScrollY.toString())
+            if (scrollView.scrollY == maxScrollY) {
+                scrollBtn.rotation = 90f
+                scrollBtn.setOnClickListener {
+                    scrollView.post {
+                        scrollView.fullScroll(ScrollView.FOCUS_UP)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun searchCountry() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 performSearch(query)
@@ -81,11 +122,15 @@ class ChooseCountryFragment: Fragment(){
 
     private fun performSearch(query: String) {
         val lowercaseQuery = query.lowercase(Locale.getDefault())
+        val queryWords = lowercaseQuery.split(" ")
+
         for (i in 0 until layout.childCount) {
             val childView = layout.getChildAt(i)
             if (childView is Button) {
                 val buttonText = childView.text.toString().lowercase(Locale.getDefault())
-                if (lowercaseQuery.isBlank() || buttonText.contains(lowercaseQuery)) {
+                val pattern = "\\b${queryWords.joinToString("\\w*\\b.*\\b")}\\w*\\b".toRegex()
+
+                if (lowercaseQuery.isBlank() || pattern.containsMatchIn(buttonText)) {
                     childView.visibility = View.VISIBLE
                 } else {
                     childView.visibility = View.GONE
@@ -94,31 +139,20 @@ class ChooseCountryFragment: Fragment(){
         }
     }
 
-
-    private fun initValues(view: View) {
-        val btnBack: ImageButton = view.findViewById(R.id.toEntrance)
-        btnBack.setOnClickListener {
-            if (::call.isInitialized) {
-                call.cancel()
-            }
-            stopFunction = true
-            activity?.finish()
-            exitProcess(0)
-
-        }
-    }
-
     override fun onPause() {
         super.onPause()
         saveScrollPosition()
     }
+
     private fun clearButtons() {
         layout.removeAllViews()
         buttons.clear()
     }
+
     private fun setupCountryListObserver() {
         progressBar.visibility = View.VISIBLE
         layout.visibility = View.GONE
+        scrollBtn.visibility = View.GONE
 
         vm.countryListLiveData.observe(viewLifecycleOwner) { countryList ->
             totalCountryCount = countryList.size
@@ -138,13 +172,13 @@ class ChooseCountryFragment: Fragment(){
             }
         }
     }
+
     private fun fetchCountryList() {
         progressBar.visibility = View.VISIBLE
         layout.visibility = View.GONE
         buttons.clear()
         vm.fetchCountryList()
     }
-
 
 
     private fun setButtonWithImage(button: Button, text: String, image: Drawable?) {
@@ -172,7 +206,7 @@ class ChooseCountryFragment: Fragment(){
             .apply(
                 RequestOptions()
                     .transform(
-                        CropCircleWithBorderTransformation(4, Color.GRAY),
+                        CropCircleWithBorderTransformation(4, Color.parseColor("#4942E4")),
                         RoundedCornersTransformation(16, 0)
                     )
                     .override(200, 200)
@@ -206,16 +240,18 @@ class ChooseCountryFragment: Fragment(){
                         val bundle = Bundle().apply { putInt("buttonId", buttonId) }
                         navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
                     }
-                    if(totalCountryCount == layout.size){
-                            restoreScrollPosition()
-                            restoreButtonOrder()
-                            progressBar.visibility = View.GONE
-                            layout.visibility = View.VISIBLE//scroll который запоминает где ты был в прошлый раз
-                        }
+                    if (totalCountryCount == layout.size) {
+                        restoreScrollPosition()
+                        restoreButtonOrder()
+                        progressBar.visibility = View.GONE
+                        layout.visibility = View.VISIBLE
                     }
+                }
+
                 override fun onLoadCleared(placeholder: Drawable?) {}
             })
-        }
+    }
+
     private fun restoreButtonOrder() {
         val orderedButtons = buttons.sortedBy { it.id }
         layout.removeAllViews()
