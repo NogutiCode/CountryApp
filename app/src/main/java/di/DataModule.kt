@@ -27,3 +27,13 @@ object DataModule {
     }
 
 }
+//1) Retrofit DONE /////////
+//2) прочитать про dependecies injection
+//3) постараться перенести на viewmodel
+//4) use recyclerview
+//5) раскидать все по пакетам к каждому viewmodel
+//6) прочитать repository pattern
+//7) посмотреть все про lifecycle
+//8) посмотреть что такое flow с coroutines
+//9) попробовать сделать offline mode (cash - Room database)
+//10) https://medium.com/@BerkOzyurt/android-clean-architecture-mvvm-usecase-ae1647f0aea3 почитать
