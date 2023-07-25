@@ -27,10 +27,10 @@ object DataModule {
     }
 
 }
-//1) Retrofit DONE /////////
+//1) Retrofit ///////// DONE
 //2) прочитать про dependecies injection
 //3) постараться перенести на viewmodel
-//4) use recyclerview
+//4) use recyclerview ///// DONE
 //5) раскидать все по пакетам к каждому viewmodel
 //6) прочитать repository pattern
 //7) посмотреть все про lifecycle

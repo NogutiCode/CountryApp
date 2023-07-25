@@ -1,8 +1,6 @@
 package com.example.countryapp
 
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -34,7 +32,7 @@ class CountryRepository {
 
     suspend fun fetchCountryList(): List<Country>? = withContext(Dispatchers.IO) {
         var retryCount = 0
-        var maxRetries = 5
+        val maxRetries = 5
         var countryList: List<Country>? = null
 
         while (retryCount < maxRetries) {

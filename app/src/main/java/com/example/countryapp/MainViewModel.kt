@@ -11,7 +11,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor() : ViewModel() {
-    var scrollPosition: Int = 0
     private val repository = CountryRepository()
 
 
