@@ -27,7 +27,9 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
         fullCountryList = newCountryList
         notifyDataSetChanged()
     }
-
+    fun getItem(position: Int): Country {
+        return countryList[position]
+    }
     @SuppressLint("NotifyDataSetChanged")
     fun filterData(filteredList: List<Country>) {
         countryList = filteredList

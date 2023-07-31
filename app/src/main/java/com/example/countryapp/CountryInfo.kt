@@ -18,6 +18,7 @@ import com.bumptech.glide.request.RequestOptions
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
+
 import okhttp3.*
 import java.text.NumberFormat
 import java.util.*
@@ -28,6 +29,7 @@ class CountryInfoFragment : Fragment() {
 
     private val vm: MainViewModel by viewModels()
     private var selectedButtonId: Int = 0
+    private var countryKey: String = ""
     private lateinit var progressBar: ProgressBar
     private lateinit var layout: LinearLayout
     private lateinit var setCountry: TextView
@@ -43,7 +45,7 @@ class CountryInfoFragment : Fragment() {
         layout = view.findViewById(R.id.listOfCountries)
         setCountry = view.findViewById(R.id.setCountry)
         progressBar = view.findViewById(R.id.progressBar)
-
+        countryKey = arguments?.getString("countryName").toString()
         ViewModelProvider(this)[MainViewModel::class.java]
         return view
     }
@@ -51,6 +53,7 @@ class CountryInfoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
+
         initButtonsAndValues()
         setupCountryListObserver()
         fetchCountryList()
@@ -68,9 +71,6 @@ class CountryInfoFragment : Fragment() {
             navController.navigateUp()
 
             //navController.navigate(R.id.action_countryInfo_to_chooseCountry)
-        }
-        arguments?.let { bundle ->
-            selectedButtonId = bundle.getInt("buttonId", 0)
         }
     }
 
@@ -121,7 +121,7 @@ class CountryInfoFragment : Fragment() {
             val arrayFifa = countryList.map { it.cca3 }.toTypedArray()
 
             val builder = StringBuilder()
-            if (index == selectedButtonId) {
+            if (nameCountry == countryKey) {
                 for (i in arrayFifa.indices) {
                     for (element in arrayBorders) {
                         if (element == arrayFifa[i]) {

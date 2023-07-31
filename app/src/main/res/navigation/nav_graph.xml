@@ -27,5 +27,8 @@
         <action
             android:id="@+id/action_countryInfo_to_chooseCountry"
             app:destination="@id/chooseCountry" />
+        <argument
+            android:name="CountryId"
+            app:argType="string" />
     </fragment>
 </navigation>

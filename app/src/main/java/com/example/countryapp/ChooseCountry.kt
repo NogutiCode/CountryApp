@@ -7,12 +7,14 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
+import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import kotlin.system.exitProcess
+
 
 
 @AndroidEntryPoint
@@ -126,7 +128,12 @@ class ChooseCountryFragment : Fragment() {
         countryAdapter.filterData(filteredList)
     }
     private fun onItemClick(position: Int) {
-        val bundle = Bundle().apply { putInt("buttonId", position) }
-        navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
+        val country = countryAdapter.getItem(position)
+        country?.name?.common?.let { countryName ->
+            val bundle = Bundle().apply {
+                putString("countryName", countryName)
+            }
+            navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
+        }
     }
 }
