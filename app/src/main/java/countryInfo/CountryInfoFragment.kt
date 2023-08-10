@@ -1,29 +1,17 @@
 package countryInfo
 
-import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import app.Country
 import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
-import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation
-
 import okhttp3.*
-import java.text.NumberFormat
-import java.util.*
 
 
 @AndroidEntryPoint
@@ -47,7 +35,6 @@ class CountryInfoFragment : Fragment() {
         setCountry = view.findViewById(R.id.setCountry)
         progressBar = view.findViewById(R.id.progressBar)
         countryKey = arguments?.getString("countryName").toString()
-        ViewModelProvider(this)[InfoViewModel::class.java]
         return view
     }
 
@@ -55,12 +42,27 @@ class CountryInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
+        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+        val layout = view.findViewById<LinearLayout>(R.id.listOfCountries)
+        val setCountry = view.findViewById<TextView>(R.id.setCountry)
+
+        val countryKey = arguments?.getString("countryName").toString()
+
+        vm.loadingLiveData.observe(viewLifecycleOwner) { isLoading ->
+            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            layout.visibility = if (isLoading) View.GONE else View.VISIBLE
+        }
+
+        vm.processedCountryInfoLiveData.observe(viewLifecycleOwner) { processedInfo ->
+            processedInfo?.let {
+                buildDesign(it)
+                setCountry.visibility = View.VISIBLE
+            }
+        }
+
+        vm.fetchCountryInfo(countryKey)
         initButtonsAndValues()
-        setupCountryListObserver()
-        fetchCountryList()
-
     }
-
 
     private fun initButtonsAndValues() {
         val buttonBack = view?.findViewById<ImageButton>(R.id.toChoose)
@@ -72,87 +74,6 @@ class CountryInfoFragment : Fragment() {
             navController.navigateUp()
         }
     }
-
-
-    private fun formatNumberWithCommas(number: Int): String {
-        val numberFormat = NumberFormat.getNumberInstance(Locale.US)
-        return numberFormat.format(number)
-    }
-
-    private fun setupCountryListObserver() {
-        vm.countryListLiveData.observe(viewLifecycleOwner) { countryList ->
-            processCountryList(countryList)
-            progressBar.visibility = View.GONE
-            layout.visibility = View.VISIBLE
-        }
-    }
-
-    private fun fetchCountryList() {
-        progressBar.visibility = View.VISIBLE
-        layout.visibility = View.GONE
-        vm.fetchCountryList()
-    }
-
-
-    private fun processCountryList(countryList: List<Country>) {
-        for ((index, country) in countryList.withIndex()) {
-            val nameCountry = country.name?.common.toString()
-            val arrayNames = countryList.map { it.name?.common }.toTypedArray()
-            val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
-            val formattedCapital = capital ?: ""
-            val flag = country.flags?.png.toString()
-
-            val currencyFindFullName = country.currencies?.values?.firstOrNull()
-            val currencyFullName: String? = currencyFindFullName?.name
-            val currencyFindSmallName = country.currencies?.toList()?.firstOrNull()
-            val currencySmallName: String? = currencyFindSmallName?.first
-            val formattedCurrencySmallName = currencySmallName ?: ""
-            val formattedCurrencyFullName = currencyFullName ?: ""
-
-            val population = country.population.toString()
-            val formattedPopulation = formatNumberWithCommas(population.toInt())
-
-            val borders = country.borders?.toString()?.replace("[", "")?.replace("]", "")
-            val withoutBracketsBorders = borders ?: ""
-            val withoutComma = withoutBracketsBorders.split(", ")
-            val arrayBorders = withoutComma.toTypedArray()
-
-            val arrayFifa = countryList.map { it.cca3 }.toTypedArray()
-
-            val builder = StringBuilder()
-            if (nameCountry == countryKey) {
-                for (i in arrayFifa.indices) {
-                    for (element in arrayBorders) {
-                        if (element == arrayFifa[i]) {
-                            if (builder.isNotEmpty()) {
-                                builder.append(", ")
-                            }
-                            builder.append(arrayNames[i])
-                        }
-                    }
-                }
-                val listNeighbors = builder.toString()
-                println("Name:; $listNeighbors $nameCountry ::: $formattedCapital ::: $flag ::: $currencySmallName $currencyFullName  ::: $formattedPopulation ::: ")
-                activity?.runOnUiThread {
-                    buildDesign(
-                        nameCountry,
-                        flag,
-                        formattedCapital,
-                        "$formattedCurrencySmallName $formattedCurrencyFullName",
-                        listNeighbors,
-                        formattedPopulation
-                    )
-
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        progressBar.visibility = View.GONE
-                        layout.visibility = View.VISIBLE
-                        setCountry.visibility = View.VISIBLE
-                    }, 50)
-                }
-            }
-        }
-    }
-
 
     private fun checkCountryInfo(
         CheckType: String,
@@ -167,14 +88,7 @@ class CountryInfoFragment : Fragment() {
         }
     }
 
-    private fun buildDesign(
-        Country: String,
-        CountryPhoto: String,
-        capitalText: String,
-        Currency: String,
-        Neighbours: String,
-        Population: String
-    ) {
+    private fun buildDesign(processedInfo: InfoViewModel.ProcessedCountryInfo) {
         if (stopFunction) {
             return
         }
@@ -190,33 +104,20 @@ class CountryInfoFragment : Fragment() {
         val noCurrency = "No own currency"
         val noCapital = "No own capital"
 
-        countryNameText?.text = Country
-        countryNameText1?.text = Country
-        capitalTexts?.text = capitalText
-        currencyText?.text = Currency
-        populationText?.text = Population
+        countryNameText?.text = processedInfo.name
+        countryNameText1?.text = processedInfo.name
+        capitalTexts?.text = processedInfo.formattedCapital
+        currencyText?.text = processedInfo.currency
+        populationText?.text = processedInfo.formattedPopulation
         if (stopFunction) {
             return
         }
-        checkCountryInfo("", Neighbours, neighborsText!!, noNeighborsText)
-        checkCountryInfo(" ", Currency, currencyText!!, noCurrency)
-        checkCountryInfo("", capitalText, capitalTexts!!, noCapital)
+        checkCountryInfo("", processedInfo.neighbours, neighborsText!!, noNeighborsText)
+        checkCountryInfo(" ", processedInfo.currency, currencyText!!, noCurrency)
+        checkCountryInfo("", processedInfo.formattedCapital, capitalTexts!!, noCapital)
 
         if (countryPhoto != null) {
-            Glide.with(requireContext())
-                .load(CountryPhoto)
-                .apply(
-                    RequestOptions()
-                        .transform(
-                            CropCircleWithBorderTransformation(
-                                4,
-                                Color.parseColor("#4942E4")
-                            ),
-                            RoundedCornersTransformation(16, 0)
-                        )
-                        .override(500, 500)
-                )
-                .into(countryPhoto)
+            vm.loadCountryImage(requireContext(), processedInfo.flag, countryPhoto)
         }
     }
 }

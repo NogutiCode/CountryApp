@@ -26,3 +26,5 @@ data class Name(
     val official: String?,
     val nativeName: Map<String, Any>?
 )
+
+
