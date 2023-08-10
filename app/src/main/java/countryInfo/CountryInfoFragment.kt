@@ -1,4 +1,4 @@
-package com.example.countryapp
+package countryInfo
 
 import android.graphics.Color
 import android.os.Bundle
@@ -15,6 +15,8 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import app.Country
+import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
@@ -27,7 +29,7 @@ import java.util.*
 @AndroidEntryPoint
 class CountryInfoFragment : Fragment() {
 
-    private val vm: MainViewModel by viewModels()
+    private val vm: InfoViewModel by viewModels()
     private var selectedButtonId: Int = 0
     private var countryKey: String = ""
     private lateinit var progressBar: ProgressBar
@@ -46,7 +48,7 @@ class CountryInfoFragment : Fragment() {
         setCountry = view.findViewById(R.id.setCountry)
         progressBar = view.findViewById(R.id.progressBar)
         countryKey = arguments?.getString("countryName").toString()
-        ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(this)[InfoViewModel::class.java]
         return view
     }
 

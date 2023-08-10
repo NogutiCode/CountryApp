@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="ChooseCountryFragment">
+    tools:context="CountryList.ChooseCountryFragment">
 
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="142dp"
         android:layout_height="133dp"
         android:layout_gravity="center"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
     <ImageButton
         android:id="@+id/toEntrance"

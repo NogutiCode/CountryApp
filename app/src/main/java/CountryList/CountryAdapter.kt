@@ -1,4 +1,4 @@
-package com.example.countryapp
+package CountryList
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import app.Country
+import com.example.countryapp.R
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 
@@ -29,11 +31,6 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
     }
     fun getItem(position: Int): Country {
         return countryList[position]
-    }
-    @SuppressLint("NotifyDataSetChanged")
-    fun filterData(filteredList: List<Country>) {
-        countryList = filteredList
-        notifyDataSetChanged()
     }
 
     fun getFullList(): List<Country> {

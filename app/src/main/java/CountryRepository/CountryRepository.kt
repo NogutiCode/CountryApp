@@ -1,5 +1,6 @@
-package com.example.countryapp
+package CountryRepository
 
+import app.Country
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers

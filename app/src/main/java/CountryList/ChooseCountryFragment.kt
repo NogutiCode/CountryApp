@@ -1,4 +1,5 @@
-package com.example.countryapp
+package CountryList
+import CountryLists.ListViewModel
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,19 +8,18 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
-import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Locale
 import kotlin.system.exitProcess
 
 
 
 @AndroidEntryPoint
 class ChooseCountryFragment : Fragment() {
-    private val vm: MainViewModel by viewModels()
+    private val vm: ListViewModel by viewModels()
     private lateinit var navController: NavController
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: RecyclerView
@@ -47,9 +47,17 @@ class ChooseCountryFragment : Fragment() {
         countryAdapter = CountryAdapter { position -> onItemClick(position) }
         recyclerView.adapter = countryAdapter
 
-        vm.countryListLiveData.observe(viewLifecycleOwner) { countryList ->
-            countryAdapter.updateData(countryList)
+
+        vm.countryListLiveData.observe(viewLifecycleOwner) { filteredCountryList ->
+            countryAdapter.updateData(filteredCountryList)
+            progressBar.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
         }
+
+        vm.filteredCountryListLiveData.observe(viewLifecycleOwner) { filteredCountryList ->
+            countryAdapter.updateData(filteredCountryList)
+        }
+
         vm.fetchCountryList()
         searchCountry()
         setupScrollListener()
@@ -63,6 +71,23 @@ class ChooseCountryFragment : Fragment() {
             exitProcess(0)
         }
     }
+    private fun searchCountry() {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                vm.performSearch(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                vm.performSearch(newText)
+                if (newText.isEmpty()) {
+                    countryAdapter.updateData(countryAdapter.getFullList())
+                }
+                return false
+            }
+        })
+    }
+
     private fun setupScrollListener() {
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -70,10 +95,7 @@ class ChooseCountryFragment : Fragment() {
 
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val totalItemCount = layoutManager.itemCount
-                //val firstVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
                 val lastVisibleItem = layoutManager.findLastCompletelyVisibleItemPosition()
-
-                //val isAtTop = firstVisibleItem == 0
                 val isAtBottom = lastVisibleItem == totalItemCount - 1
 
                 if (isAtBottom) {
@@ -90,46 +112,10 @@ class ChooseCountryFragment : Fragment() {
             }
         })
     }
-    private fun searchCountry() {
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                performSearch(query)
-                return true
-            }
 
-            override fun onQueryTextChange(newText: String): Boolean {
-                performSearch(newText)
-                if (newText.isEmpty()) {
-                    countryAdapter.updateData(countryAdapter.getFullList())
-                }
-                return false
-            }
-        })
-    }
-    private fun performSearch(query: String) {
-        val lowercaseQuery = query.lowercase(Locale.getDefault())
-        val queryWords = lowercaseQuery.split(" ")
-
-        val filteredList = if (lowercaseQuery.isBlank()) {
-            countryAdapter.getFullList()
-        } else {
-            countryAdapter.getFullList().filter { country ->
-                val name = country.name?.common?.lowercase(Locale.getDefault())
-                val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")?.lowercase(
-                    Locale.getDefault()
-                )
-
-                queryWords.all { word ->
-                    name?.contains(word) == true || capital?.contains(word) == true
-                }
-            }
-        }
-
-        countryAdapter.filterData(filteredList)
-    }
     private fun onItemClick(position: Int) {
         val country = countryAdapter.getItem(position)
-        country?.name?.common?.let { countryName ->
+        country.name?.common?.let { countryName ->
             val bundle = Bundle().apply {
                 putString("countryName", countryName)
             }

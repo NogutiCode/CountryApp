@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/entrance"
-        android:name="com.example.countryapp.EntranceFragment"
+        android:name="Entrace.EntranceFragment"
         android:label="fragment_entrance">
         <action
             android:id="@+id/action_entrance_to_chooseCountry"
@@ -14,7 +14,7 @@
     </fragment>
     <fragment
         android:id="@+id/chooseCountry"
-        android:name="com.example.countryapp.ChooseCountryFragment"
+        android:name="CountryList.ChooseCountryFragment"
         android:label="fragment_choose_country">
         <action
             android:id="@+id/action_chooseCountry_to_countryInfo"
@@ -22,7 +22,7 @@
     </fragment>
     <fragment
         android:id="@+id/countryInfo"
-        android:name="com.example.countryapp.CountryInfoFragment"
+        android:name="countryInfo.CountryInfoFragment"
         android:label="fragment_country_info">
         <action
             android:id="@+id/action_countryInfo_to_chooseCountry"

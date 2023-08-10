@@ -1,8 +1,10 @@
-package com.example.countryapp
+package Entrace
 
+import CountryList.ChooseCountryFragment
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.system.exitProcess
 

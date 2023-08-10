@@ -1,4 +1,4 @@
-package com.example.countryapp
+package Entrace
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -11,6 +11,7 @@ import android.widget.Button
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

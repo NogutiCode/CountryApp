@@ -3,7 +3,7 @@ package di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.countryapp.CountryRepository
+import CountryRepository.CountryRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +25,8 @@ object DataModule {
     fun provideCountryRepository(): CountryRepository {
         return CountryRepository()
     }
+
+
 
 }
 //1) Retrofit ///////// DONE

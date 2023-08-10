@@ -1,4 +1,4 @@
-package com.example.countryapp
+package app
 
 
 data class Country(
