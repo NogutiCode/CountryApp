@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CountryApp">
         <activity
-            android:name="Entrace.MainActivity"
+            android:name="entrace.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

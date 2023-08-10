@@ -1,4 +1,4 @@
-package Entrace
+package entrace
 
 import android.content.Context
 import android.content.SharedPreferences

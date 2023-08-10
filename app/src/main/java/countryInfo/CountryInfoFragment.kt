@@ -30,7 +30,6 @@ import java.util.*
 class CountryInfoFragment : Fragment() {
 
     private val vm: InfoViewModel by viewModels()
-    private var selectedButtonId: Int = 0
     private var countryKey: String = ""
     private lateinit var progressBar: ProgressBar
     private lateinit var layout: LinearLayout
@@ -71,8 +70,6 @@ class CountryInfoFragment : Fragment() {
             }
             stopFunction = true
             navController.navigateUp()
-
-            //navController.navigate(R.id.action_countryInfo_to_chooseCountry)
         }
     }
 
@@ -222,5 +219,4 @@ class CountryInfoFragment : Fragment() {
                 .into(countryPhoto)
         }
     }
-
 }

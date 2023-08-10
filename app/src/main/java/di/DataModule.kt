@@ -3,7 +3,7 @@ package di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import CountryRepository.CountryRepository
+import countryRepository.CountryRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,9 +31,9 @@ object DataModule {
 }
 //1) Retrofit ///////// DONE
 //2) прочитать про dependecies injection
-//3) постараться перенести на viewmodel
+//3) постараться перенести на viewmodel ///// DONE
 //4) use recyclerview ///// DONE
-//5) раскидать все по пакетам к каждому viewmodel
+//5) раскидать все по пакетам к каждому viewmodel ///// DONE
 //6) прочитать repository pattern
 //7) посмотреть все про lifecycle
 //8) посмотреть что такое flow с coroutines

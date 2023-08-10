@@ -1,4 +1,4 @@
-package CountryRepository
+package countryRepository
 
 import app.Country
 import com.squareup.moshi.Moshi

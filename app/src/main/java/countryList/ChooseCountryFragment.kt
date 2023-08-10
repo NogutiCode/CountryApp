@@ -1,10 +1,11 @@
-package CountryList
-import CountryLists.ListViewModel
+package countryList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
@@ -14,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.system.exitProcess
-
 
 
 @AndroidEntryPoint
@@ -47,15 +47,14 @@ class ChooseCountryFragment : Fragment() {
         countryAdapter = CountryAdapter { position -> onItemClick(position) }
         recyclerView.adapter = countryAdapter
 
+        vm.filteredCountryListLiveData.observe(viewLifecycleOwner) { filteredCountryList ->
+            countryAdapter.updateData(filteredCountryList)
+        }
 
         vm.countryListLiveData.observe(viewLifecycleOwner) { filteredCountryList ->
             countryAdapter.updateData(filteredCountryList)
             progressBar.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-        }
-
-        vm.filteredCountryListLiveData.observe(viewLifecycleOwner) { filteredCountryList ->
-            countryAdapter.updateData(filteredCountryList)
         }
 
         vm.fetchCountryList()

@@ -1,6 +1,6 @@
-package CountryLists
+package countryList
 
-import CountryRepository.CountryRepository
+import countryRepository.CountryRepository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
