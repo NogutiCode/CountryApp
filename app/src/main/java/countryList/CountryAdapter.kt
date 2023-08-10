@@ -67,9 +67,6 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
             val formattedCapital = capital ?: ""
 
             button.text = "$name \n$formattedCapital"
-            button.isAllCaps = false
-            button.textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-            button.compoundDrawablePadding = 75
 
             Glide.with(itemView)
                 .load(flag)

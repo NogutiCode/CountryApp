@@ -1,26 +1,28 @@
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/countryLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:padding="20dp">
 
     <ImageView
         android:id="@+id/countryImageView"
         android:layout_width="75dp"
         android:layout_height="75dp"
-        android:layout_centerHorizontal="true"
-         />
+        android:layout_gravity="start|center_vertical" />
 
     <Button
         android:id="@+id/countryButton"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="75dp"
-        android:layout_weight="1"
+        android:layout_marginStart="8dp"
         android:textColor="#000"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
-        android:background="@android:color/transparent" />
+        android:textSize="16sp"
+        android:textAlignment="textStart"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:background="@android:color/transparent"
+        android:paddingStart="80dp"
+        />
 
-</LinearLayout>
+</FrameLayout>
+
+
