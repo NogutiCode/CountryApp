@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -54,7 +55,8 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
     inner class CountryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val button: Button = itemView.findViewById(R.id.countryButton)
         private val imageView: ImageView = itemView.findViewById(R.id.countryImageView)
-
+        private val countryText: TextView = itemView.findViewById(R.id.countryText)
+        private val capitalText: TextView = itemView.findViewById(R.id.capitalText)
         init {
             button.setOnClickListener { onItemClick(adapterPosition) }
         }
@@ -65,8 +67,8 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
             val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
             val flag = country.flags?.png
             val formattedCapital = capital ?: ""
-
-            button.text = "$name \n$formattedCapital"
+            countryText.text = name
+            capitalText.text = formattedCapital
 
             Glide.with(itemView)
                 .load(flag)
