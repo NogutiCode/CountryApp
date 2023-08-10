@@ -1,28 +1,32 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="20dp">
 
     <ImageView
         android:id="@+id/countryImageView"
         android:layout_width="75dp"
         android:layout_height="75dp"
-        android:layout_gravity="start|center_vertical" />
+        android:layout_gravity="start|center_vertical"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/countryButton"
         android:layout_width="match_parent"
         android:layout_height="75dp"
-        android:layout_marginStart="8dp"
-        android:textColor="#000"
         android:textSize="16sp"
+        android:paddingStart="90dp"
         android:textAlignment="textStart"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:background="@android:color/transparent"
-        android:paddingStart="80dp"
-        />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintStart_toEndOf="@id/countryImageView"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="MissingConstraints"
+        android:text="Your Text Here"
+        android:textColor="?android:textColorPrimary"  />
 
-</FrameLayout>
-
-
+</androidx.constraintlayout.widget.ConstraintLayout>
