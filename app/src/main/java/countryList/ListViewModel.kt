@@ -8,14 +8,15 @@ import androidx.lifecycle.viewModelScope
 import app.Country
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class ListViewModel @Inject constructor() : ViewModel() {
-    private val repository = CountryRepository()
+class ListViewModel @Inject constructor(
+        private val repository: CountryRepository
+    ) : ViewModel() {
 
     private val _countryListLiveData = MutableLiveData<List<Country>>()
     val countryListLiveData: LiveData<List<Country>>
@@ -28,14 +29,11 @@ class ListViewModel @Inject constructor() : ViewModel() {
 
     fun fetchCountryList() {
         viewModelScope.launch {
-            try {
-                val countryList = withContext(Dispatchers.IO) {
-                    repository.fetchCountryList()
+            repository.fetchCountryList()
+                .flowOn(Dispatchers.IO)
+                .collect { countryList ->
+                    _countryListLiveData.value = countryList
                 }
-                _countryListLiveData.value = countryList!!
-            } catch (_: Exception) {
-
-            }
         }
     }
 

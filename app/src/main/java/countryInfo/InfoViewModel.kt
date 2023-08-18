@@ -22,8 +22,9 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class InfoViewModel @Inject constructor() : ViewModel() {
-    private val repository = CountryRepository()
+class InfoViewModel @Inject constructor(
+    private val repository: CountryRepository
+) : ViewModel() {
 
     private val _processedCountryInfoLiveData = MutableLiveData<ProcessedCountryInfo>()
     val processedCountryInfoLiveData: LiveData<ProcessedCountryInfo> = _processedCountryInfoLiveData
@@ -43,13 +44,14 @@ class InfoViewModel @Inject constructor() : ViewModel() {
     fun fetchCountryInfo(countryName: String) {
         _loadingLiveData.value = true
         viewModelScope.launch {
-            val countryList = repository.fetchCountryList()
-            val selectedCountry = countryList?.find { it.name?.common == countryName }
-            selectedCountry?.let { country ->
-                val processedInfo = processCountry(country, countryList, countryName)
-                _processedCountryInfoLiveData.postValue(processedInfo)
+            repository.fetchCountryList().collect { countryList ->
+                val selectedCountry = countryList.find { it.name?.common == countryName }
+                selectedCountry?.let { country ->
+                    val processedInfo = processCountry(country, countryList, countryName)
+                    _processedCountryInfoLiveData.postValue(processedInfo)
+                }
+                _loadingLiveData.postValue(false)
             }
-            _loadingLiveData.postValue(false)
         }
     }
 
