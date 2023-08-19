@@ -15,6 +15,11 @@ import com.bumptech.glide.request.RequestOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -26,12 +31,6 @@ class InfoViewModel @Inject constructor(
     private val repository: CountryRepository
 ) : ViewModel() {
 
-    private val _processedCountryInfoLiveData = MutableLiveData<ProcessedCountryInfo>()
-    val processedCountryInfoLiveData: LiveData<ProcessedCountryInfo> = _processedCountryInfoLiveData
-
-    private val _loadingLiveData = MutableLiveData<Boolean>()
-    val loadingLiveData: LiveData<Boolean> = _loadingLiveData
-
     data class ProcessedCountryInfo(
         val name: String,
         val formattedCapital: String,
@@ -41,17 +40,27 @@ class InfoViewModel @Inject constructor(
         val formattedPopulation: String
     )
 
+    private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
+    val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
+
+    private val _processedCountryInfoStateFlow = MutableStateFlow<ProcessedCountryInfo?>(null)
+    val processedCountryInfoStateFlow: StateFlow<ProcessedCountryInfo?> = _processedCountryInfoStateFlow
+
     fun fetchCountryInfo(countryName: String) {
-        _loadingLiveData.value = true
         viewModelScope.launch {
-            repository.fetchCountryList().collect { countryList ->
-                val selectedCountry = countryList.find { it.name?.common == countryName }
-                selectedCountry?.let { country ->
-                    val processedInfo = processCountry(country, countryList, countryName)
-                    _processedCountryInfoLiveData.postValue(processedInfo)
+            _loadingStateFlow.value = true
+            repository.fetchCountryList()
+                .map { countryList ->
+                    val selectedCountry = countryList.find { it.name?.common == countryName }
+                    selectedCountry?.let { country ->
+                        processCountry(country, countryList, countryName)
+                    }
                 }
-                _loadingLiveData.postValue(false)
-            }
+                .flowOn(Dispatchers.Default)
+                .collect { processedInfo ->
+                    _processedCountryInfoStateFlow.value = processedInfo
+                    _loadingStateFlow.value = false
+                }
         }
     }
 

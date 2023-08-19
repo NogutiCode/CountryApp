@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.example.countryapp.R
@@ -14,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import okhttp3.*
 
 
+@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class CountryInfoFragment : Fragment() {
 
@@ -48,15 +50,19 @@ class CountryInfoFragment : Fragment() {
 
         val countryKey = arguments?.getString("countryName").toString()
 
-        vm.loadingLiveData.observe(viewLifecycleOwner) { isLoading ->
-            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-            layout.visibility = if (isLoading) View.GONE else View.VISIBLE
+        lifecycleScope.launchWhenStarted {
+            vm.loadingStateFlow.collect { isLoading ->
+                progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                layout.visibility = if (isLoading) View.GONE else View.VISIBLE
+            }
         }
 
-        vm.processedCountryInfoLiveData.observe(viewLifecycleOwner) { processedInfo ->
-            processedInfo?.let {
-                buildDesign(it)
-                setCountry.visibility = View.VISIBLE
+        lifecycleScope.launchWhenStarted {
+            vm.processedCountryInfoStateFlow.collect { processedInfo: InfoViewModel.ProcessedCountryInfo? ->
+                processedInfo?.let {
+                    buildDesign(it)
+                    setCountry.visibility = View.VISIBLE
+                }
             }
         }
 

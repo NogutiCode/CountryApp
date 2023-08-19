@@ -1,4 +1,5 @@
 package countryList
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,15 +9,19 @@ import android.widget.ProgressBar
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.system.exitProcess
 
-
+@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class ChooseCountryFragment : Fragment() {
     private val vm: ListViewModel by viewModels()
@@ -42,25 +47,32 @@ class ChooseCountryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
+
+
+
         recyclerView = view.findViewById(R.id.recyclerViewCountries)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         countryAdapter = CountryAdapter { position -> onItemClick(position) }
         recyclerView.adapter = countryAdapter
 
-        vm.filteredCountryListLiveData.observe(viewLifecycleOwner) { filteredCountryList ->
-            countryAdapter.updateData(filteredCountryList)
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            vm.filteredCountryListFlow.collect { filteredCountryList ->
+                countryAdapter.updateData(filteredCountryList)
+            }
         }
 
-        vm.countryListLiveData.observe(viewLifecycleOwner) { filteredCountryList ->
-            countryAdapter.updateData(filteredCountryList)
-            progressBar.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            vm.countryListFlow.collect { filteredCountryList ->
+                countryAdapter.updateData(filteredCountryList)
+                progressBar.visibility = View.GONE
+            }
         }
-
         vm.fetchCountryList()
         searchCountry()
         setupScrollListener()
         initValues(view)
+
     }
 
     private fun initValues(view: View) {
@@ -70,6 +82,7 @@ class ChooseCountryFragment : Fragment() {
             exitProcess(0)
         }
     }
+
     private fun searchCountry() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
