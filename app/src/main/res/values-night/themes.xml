@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/pastel_200</item>
         <item name="colorPrimaryVariant">@color/black</item>
         <item name="colorOnPrimary">@color/white</item>
+        <item name="editTextColor">@color/darkest_gray</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/lightPastel_200</item>
         <item name="colorSecondaryVariant">@color/lightPastel_200</item>

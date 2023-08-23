@@ -75,7 +75,7 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
                 .apply(
                     RequestOptions()
                         .transform(
-                            CropCircleWithBorderTransformation(4, Color.parseColor("#4942E4")),
+                            CropCircleWithBorderTransformation(4, Color.parseColor("#cfc1c0")),
                             RoundedCornersTransformation(16, 0)
                         )
                         .override(200, 200)

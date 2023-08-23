@@ -12,31 +12,49 @@
         android:layout_width="142dp"
         android:layout_height="133dp"
         android:layout_gravity="center"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:indeterminateTint="@color/gray" />
 
-    <ImageButton
-        android:id="@+id/toChoose"
-        android:src="@drawable/nicepng_arrow_png_transparent_1039094"
-        android:layout_margin="15dp"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        app:tint="@color/lightPurple_200"
-        />
 
-    <TextView
-        android:id="@+id/setCountry"
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/Toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="10dp"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="25sp"
-        />
+        android:padding="10dp"
+        android:background="@android:color/transparent"
+        app:contentInsetStart="0dp">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical">
+
+
+            <TextView
+                android:id="@+id/setCountry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
+                android:layout_marginEnd="10dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="18sp"
+                android:layout_gravity="center_vertical"
+                />
+            <ImageButton
+                android:id="@+id/toChoose"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/transparent_arrow_icon_5"
+                android:layout_gravity="start|center_vertical"
+                android:backgroundTint="?android:textColorPrimary"
+                android:rotation="180"/>
+
+        </FrameLayout>
+
+    </androidx.appcompat.widget.Toolbar>
 
 
 
@@ -74,7 +92,7 @@
                 android:textAlignment="center"
                 android:text=""
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="40sp"
+                android:textSize="24sp"
                 />
             <TextView
                 android:layout_marginStart="15dp"
@@ -85,7 +103,7 @@
                 android:textAlignment="textStart"
                 android:text="Capital"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 />
             <TextView
                 android:layout_marginStart="15dp"
@@ -103,7 +121,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#4942E4" />
+                android:background="@android:color/darker_gray" />
 
             <TextView
                 android:layout_marginStart="15dp"
@@ -114,7 +132,7 @@
                 android:textAlignment="textStart"
                 android:text="Currency"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 />
             <TextView
                 android:layout_marginStart="15dp"
@@ -134,7 +152,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#4942E4" />
+                android:background="@android:color/darker_gray" />
 
             <TextView
                 android:layout_marginStart="15dp"
@@ -145,7 +163,7 @@
                 android:textAlignment="textStart"
                 android:text="Neighbours"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 />
             <TextView
                 android:layout_marginStart="15dp"
@@ -164,7 +182,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#4942E4" />
+                android:background="@android:color/darker_gray" />
 
             <TextView
                 android:layout_marginStart="15dp"
@@ -175,7 +193,7 @@
                 android:textAlignment="textStart"
                 android:text="Population"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 />
             <TextView
                 android:layout_marginStart="15dp"
@@ -194,7 +212,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="#4942E4" />
+                android:background="@android:color/darker_gray" />
         </LinearLayout>
 
     </ScrollView>

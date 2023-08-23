@@ -4,9 +4,7 @@ package countryInfo
 import android.content.Context
 import android.graphics.Color
 import android.widget.ImageView
-import androidx.lifecycle.LiveData
 import countryRepository.CountryRepository
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.Country
@@ -40,7 +38,7 @@ class InfoViewModel @Inject constructor(
         val formattedPopulation: String
     )
 
-    private val _loadingStateFlow = MutableStateFlow<Boolean>(false)
+    private val _loadingStateFlow = MutableStateFlow(false)
     val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
 
     private val _processedCountryInfoStateFlow = MutableStateFlow<ProcessedCountryInfo?>(null)
@@ -128,7 +126,7 @@ class InfoViewModel @Inject constructor(
                     .transform(
                         CropCircleWithBorderTransformation(
                             4,
-                            Color.parseColor("#4942E4")
+                            Color.parseColor("#cfc1c0")
                         ),
                         RoundedCornersTransformation(16, 0)
                     )
