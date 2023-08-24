@@ -71,6 +71,7 @@
                 android:inputType="textCapWords"
                 android:textSize="14sp"
                 android:paddingStart="40dp"
+                android:paddingEnd="35dp"
                 android:hint="Search Country"
                 android:textColorHint="@color/dark_gray"
                 />
