@@ -14,7 +14,7 @@ interface CountryApiService {
 class CountryRepository @Inject constructor(
     private val apiService: CountryApiService
 ) {
-    suspend fun fetchCountryList(): Flow<List<Country>> = flow {
+    suspend fun fetchCountryList(): Flow<List<Country>> = flow {// function that suspends it + the country list returns as a Flow.
         emit(apiService.fetchCountryList())
     }
 }

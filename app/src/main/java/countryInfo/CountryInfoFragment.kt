@@ -19,7 +19,7 @@ import okhttp3.*
 @AndroidEntryPoint
 class CountryInfoFragment : Fragment() {
 
-    private val vm: InfoViewModel by viewModels()
+    private val vm: InfoViewModel by viewModels() // init vm
     private var countryKey: String = ""
     private lateinit var progressBar: ProgressBar
     private lateinit var layout: LinearLayout
@@ -50,14 +50,14 @@ class CountryInfoFragment : Fragment() {
 
         val countryKey = arguments?.getString("countryName").toString()
 
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launchWhenStarted { // show info  + enable disable progress bar & layout
             vm.loadingStateFlow.collect { isLoading ->
                 progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
                 layout.visibility = if (isLoading) View.GONE else View.VISIBLE
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        lifecycleScope.launchWhenStarted { // show info abt country
             vm.processedCountryInfoStateFlow.collect { processedInfo: InfoViewModel.ProcessedCountryInfo? ->
                 processedInfo?.let {
                     buildDesign(it)
@@ -81,7 +81,7 @@ class CountryInfoFragment : Fragment() {
         }
     }
 
-    private fun checkCountryInfo(
+    private fun checkCountryInfo( // simple function to set text if the country does not have something
         CheckType: String,
         TextCheck: String,
         TextVar: TextView,

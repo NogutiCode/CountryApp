@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    override fun onBackPressed() { // function that checks with fragment user use, and allows to exit from program.
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragmentContainerView)
         val currentFragment = navHostFragment?.childFragmentManager?.fragments?.get(0)
         if (currentFragment is ChooseCountryFragment) {

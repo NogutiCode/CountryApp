@@ -38,7 +38,6 @@ class ChooseCountryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_choose_country, container, false)
         progressBar = view.findViewById(R.id.progressBar)
         scrollBtn = view.findViewById(R.id.InvisibleBtn)
-        //searchView = view.findViewById(R.id.SearchView)
         return view
     }
 
@@ -52,18 +51,18 @@ class ChooseCountryFragment : Fragment() {
         recyclerView.adapter = countryAdapter
 
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {// shows list in recyclerview
             vm.filteredCountryListFlow.collect { filteredCountryList ->
                 countryAdapter.updateData(filteredCountryList)
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted { // must use this for search view
             vm.countryListFlow.collect { filteredCountryList ->
                 countryAdapter.updateData(filteredCountryList)
             }
         }
-        countryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+        countryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() { //check elements in recyclerview + Adapter . When all show, it removes progressbar
             override fun onChanged() {
                 super.onChanged()
                 if (countryAdapter.itemCount > 0) {
@@ -86,7 +85,7 @@ class ChooseCountryFragment : Fragment() {
         }
     }
 
-    private fun searchCountry() {
+    private fun searchCountry() { // function to use edit view  with parse function.
         val clearButton = view?.findViewById<ImageButton>(R.id.removeText)
         clearButton?.setOnClickListener {
             searchView.text.clear()
@@ -113,7 +112,7 @@ class ChooseCountryFragment : Fragment() {
         })
     }
 
-    private fun setupScrollListener() {
+    private fun setupScrollListener() { // function for using scroll button down/up
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -142,7 +141,7 @@ class ChooseCountryFragment : Fragment() {
         })
     }
 
-    private fun onItemClick(position: Int) {
+    private fun onItemClick(position: Int) { // simple function to bundle primary key as country name. And pass to other fragment.
         val country = countryAdapter.getItem(position)
         country.name?.common?.let { countryName ->
             val bundle = Bundle().apply {

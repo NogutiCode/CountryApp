@@ -22,27 +22,27 @@ import javax.inject.Singleton
 object DataModule {
 
     @Provides
-    @Singleton
-    fun provideSharedPreferences(application: Application): SharedPreferences {
+    @Singleton // it makes 1 time
+    fun provideSharedPreferences(application: Application): SharedPreferences { // to check if program started first time or not
         return application.getSharedPreferences("entrance", Context.MODE_PRIVATE)
     }
 
 
     @Provides
-    @Singleton
-    fun provideGlide(@ApplicationContext context: Context): RequestManager {
+    @Singleton // it makes 1 time
+    fun provideGlide(@ApplicationContext context: Context): RequestManager { // for glide package  to make rounded pictures
         return Glide.with(context)
     }
 
     @Provides
-    fun provideMoshi(): Moshi {
+    fun provideMoshi(): Moshi { // parse info to json
         return Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
             .build()
     }
 
     @Provides
-    fun provideRetrofit(moshi: Moshi): Retrofit {
+    fun provideRetrofit(moshi: Moshi): Retrofit { // make api request
         return Retrofit.Builder()
             .baseUrl("https://restcountries.com/")
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -50,20 +50,12 @@ object DataModule {
     }
 
     @Provides
-    fun provideCountryApiService(retrofit: Retrofit): CountryApiService {
+    fun provideCountryApiService(retrofit: Retrofit): CountryApiService { //to use my api service that gets other part of link
         return retrofit.create(CountryApiService::class.java)
     }
 
 }
-//1) Retrofit ///// DONE
-//2) Прочитать про dependecies injection //// DONE
-//3) постараться перенести на viewmodel ///// DONE
-//4) use recyclerview ///// DONE
-//5) раскидать все по пакетам к каждому viewmodel ///// DONE
-//6) прочитать repository pattern //// DONE
-//7) посмотреть все про lifecycle //// DONE
-//8) посмотреть что такое flow с coroutines ///// DONE
+
 //###################################
-//9) Попробовать сделать offline mode (cash - Room database) ==========
+//1) try to do offline mode (cash - Room database) ========== last
 //###################################
-//10) https://medium.com/@BerkOzyurt/android-clean-architecture-mvvm-usecase-ae1647f0aea3 почитать //// DONE

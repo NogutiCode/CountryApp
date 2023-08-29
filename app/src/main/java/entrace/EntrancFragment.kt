@@ -38,7 +38,7 @@ class EntranceFragment : Fragment() {
 
     }
 
-    private fun initFirstLaunch() {
+    private fun initFirstLaunch() { //check first launch
         sharedPreferences = requireContext().getSharedPreferences("entrance", Context.MODE_PRIVATE)
         val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
 

@@ -18,19 +18,19 @@ class ListViewModel @Inject constructor(
     private val repository: CountryRepository
 ) : ViewModel() {
 
-    private val _countryListFlow = MutableStateFlow<List<Country>>(emptyList())
-    val countryListFlow: StateFlow<List<Country>>
+    private val _countryListFlow = MutableStateFlow<List<Country>>(emptyList()) // Convert Mutable data to livedata (flow)
+    val countryListFlow: StateFlow<List<Country>>  // Help users to read ur code + foolproof (flow)
         get() = _countryListFlow
 
-    private val _filteredCountryListFlow = MutableStateFlow<List<Country>>(emptyList())
-    val filteredCountryListFlow: StateFlow<List<Country>>
+    private val _filteredCountryListFlow = MutableStateFlow<List<Country>>(emptyList()) // Convert Mutable data to livedata (flow)
+    val filteredCountryListFlow: StateFlow<List<Country>>  // Help users to read ur code + foolproof (flow)
         get() = _filteredCountryListFlow
 
     init {
         fetchCountryList()
     }
 
-    fun fetchCountryList() {
+    fun fetchCountryList() { // fetch the list of countries (api)
         viewModelScope.launch {
             repository.fetchCountryList()
                 .flowOn(Dispatchers.IO)
@@ -40,7 +40,7 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    fun performSearch(query: String) {
+    fun performSearch(query: String) { // search parse function
         val lowercaseQuery = query.lowercase(Locale.getDefault())
         val queryWords = lowercaseQuery.split(" ")
 
