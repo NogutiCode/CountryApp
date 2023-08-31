@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import countryRepository.CountryRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.RecyclerView
 import app.Country
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +34,7 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    private val _recyclerViewVisibility = MutableLiveData<Int>(View.VISIBLE)
+    private val _recyclerViewVisibility = MutableLiveData(View.VISIBLE)
     val recyclerViewVisibility: LiveData<Int> = _recyclerViewVisibility
 
     private val countries: MutableList<Array<String>> = mutableListOf()
