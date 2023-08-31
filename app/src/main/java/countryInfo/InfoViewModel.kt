@@ -39,13 +39,13 @@ class InfoViewModel @Inject constructor(
         val formattedPopulation: String
     )
 
-    private val _loadingStateFlow = MutableStateFlow(false)
-    val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
+    private val _loadingStateFlow = MutableStateFlow(false) // Convert Mutable data to livedata (flow)
+    val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow // Help users to read ur code + foolproof (flow)
 
     private val _processedCountryInfoStateFlow = MutableStateFlow<ProcessedCountryInfo?>(null)
     val processedCountryInfoStateFlow: StateFlow<ProcessedCountryInfo?> = _processedCountryInfoStateFlow
 
-    fun fetchCountryInfo(countryName: String) {
+    fun fetchCountryInfo(countryName: String) { // Get info from api key - and parse it
         viewModelScope.launch {
             _loadingStateFlow.value = true
             repository.fetchCountryList()
@@ -96,7 +96,7 @@ class InfoViewModel @Inject constructor(
 
         val arrayFifa = countryList.map { it.cca3 }.toTypedArray()
 
-        val builder = StringBuilder()
+        val builder = StringBuilder()// Find neighbours
         if (nameCountry == countryKey) {
             for (i in arrayFifa.indices) {
                 for (element in arrayBorders) {
