@@ -65,7 +65,6 @@ class CountryInfoFragment : Fragment() {
                 }
             }
         }
-
         vm.fetchCountryInfo(countryKey)
         initButtonsAndValues()
     }
@@ -78,19 +77,6 @@ class CountryInfoFragment : Fragment() {
             }
             stopFunction = true
             navController.navigateUp()
-        }
-    }
-
-    private fun checkCountryInfo(
-        CheckType: String,
-        TextCheck: String,
-        TextVar: TextView,
-        IfNoSomething: String
-    ) {
-        if (TextCheck == CheckType) {
-            TextVar.text = IfNoSomething
-        } else {
-            TextVar.text = TextCheck
         }
     }
 
@@ -115,12 +101,20 @@ class CountryInfoFragment : Fragment() {
         capitalTexts?.text = processedInfo.formattedCapital
         currencyText?.text = processedInfo.currency
         populationText?.text = processedInfo.formattedPopulation
+        neighborsText?.text = processedInfo.neighbours
         if (stopFunction) {
             return
         }
-        checkCountryInfo("", processedInfo.neighbours, neighborsText!!, noNeighborsText)
-        checkCountryInfo(" ", processedInfo.currency, currencyText!!, noCurrency)
-        checkCountryInfo("", processedInfo.formattedCapital, capitalTexts!!, noCapital)
+
+        if (processedInfo.neighbours.isEmpty()) {
+            neighborsText?.text = noNeighborsText
+        }
+        if (processedInfo.currency.trim().isEmpty()) {
+            currencyText?.text = noCurrency
+        }
+        if (processedInfo.formattedCapital.isEmpty()) {
+            capitalTexts?.text = noCapital
+        }
 
         if (countryPhoto != null) {
             vm.loadCountryImage(requireContext(), processedInfo.flag, countryPhoto)

@@ -1,26 +1,21 @@
 package entrace
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class EntranceFragment : Fragment() {
     private lateinit var navController: NavController
-
-    @Inject
-    lateinit var sharedPreferences: SharedPreferences
+    private val viewModel: EntranceViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,19 +30,12 @@ class EntranceFragment : Fragment() {
 
         initFirstLaunch()
         initButton(view)
-
     }
 
     private fun initFirstLaunch() {
-        sharedPreferences = requireContext().getSharedPreferences("entrance", Context.MODE_PRIVATE)
-        val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
-
-        if (isFirstLaunch) {
-            sharedPreferences.edit().putBoolean("isFirstLaunch", false).apply()
-        }
-
-        if (isFirstLaunch) {
-            showFirstFrame()
+        if (viewModel.isFirstLaunch) {
+            viewModel.markFirstLaunchDone()
+            navController.navigate(R.id.entrance)
         } else {
             navController.navigate(R.id.action_entrance_to_chooseCountry)
         }
@@ -59,15 +47,5 @@ class EntranceFragment : Fragment() {
             navController.navigate(R.id.action_entrance_to_chooseCountry)
         }
     }
-
-    private fun FragmentManager.showFragment(fragment: Fragment, containerViewId: Int) {
-        beginTransaction().replace(containerViewId, fragment).commit()
-    }
-
-    private fun showFirstFrame() {
-        parentFragmentManager.showFragment(this, R.id.fragmentContainerView)
-    }
-
 }
-
 

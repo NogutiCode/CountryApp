@@ -20,6 +20,7 @@
             android:text="Log in"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="20sp"
+            android:textColor="?android:textColorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_percent="0.1"
@@ -28,7 +29,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.638"
             app:layout_constraintWidth_percent="0.9"
-            tools:ignore="HardcodedText" />
+        />
+
 
         <TextView
             android:layout_width="0dp"

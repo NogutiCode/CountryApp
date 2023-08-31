@@ -2,14 +2,15 @@ package countryInfo
 
 
 import android.content.Context
-import android.graphics.Color
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import countryRepository.CountryRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.Country
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.countryapp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
@@ -118,7 +119,9 @@ class InfoViewModel @Inject constructor(
             formattedPopulation
         )
     }
+
     fun loadCountryImage(context: Context, imageUrl: String, imageView: ImageView) {
+        val borderColor = ContextCompat.getColor(imageView.context, R.color.gray)
         Glide.with(context)
             .load(imageUrl)
             .apply(
@@ -126,7 +129,7 @@ class InfoViewModel @Inject constructor(
                     .transform(
                         CropCircleWithBorderTransformation(
                             4,
-                            Color.parseColor("#cfc1c0")
+                            borderColor
                         ),
                         RoundedCornersTransformation(16, 0)
                     )

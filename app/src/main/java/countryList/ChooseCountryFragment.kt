@@ -1,5 +1,6 @@
 package countryList
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -16,11 +18,14 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import app.Country
 import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
+import entrace.MainActivity
+import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
-@Suppress("DEPRECATION")
+
 @AndroidEntryPoint
 class ChooseCountryFragment : Fragment() {
     private val vm: ListViewModel by viewModels()
@@ -38,7 +43,8 @@ class ChooseCountryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_choose_country, container, false)
         progressBar = view.findViewById(R.id.progressBar)
         scrollBtn = view.findViewById(R.id.InvisibleBtn)
-        //searchView = view.findViewById(R.id.SearchView)
+        recyclerView = view.findViewById(R.id.recyclerViewCountries)
+
         return view
     }
 
@@ -46,23 +52,23 @@ class ChooseCountryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
         searchView = view.findViewById(R.id.searchview)
-        recyclerView = view.findViewById(R.id.recyclerViewCountries)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         countryAdapter = CountryAdapter { position -> onItemClick(position) }
         recyclerView.adapter = countryAdapter
 
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            vm.filteredCountryListFlow.collect { filteredCountryList ->
-                countryAdapter.updateData(filteredCountryList)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            val currentDestination = navController.currentDestination
+
+            if (currentDestination?.id == R.id.chooseCountry) {
+                activity?.finish()
+            } else {
+                val intent = Intent(requireContext(), MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            vm.countryListFlow.collect { filteredCountryList ->
-                countryAdapter.updateData(filteredCountryList)
-            }
-        }
         countryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onChanged() {
                 super.onChanged()
@@ -71,18 +77,38 @@ class ChooseCountryFragment : Fragment() {
                 }
             }
         })
+
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            vm.combinedCountryListFlow.collect { combinedList ->
+                updateAdapterData(combinedList)
+            }
+        }
+
+        vm.recyclerViewVisibility.observe(viewLifecycleOwner) { visibility ->
+            recyclerView.visibility = visibility
+        }
+
         vm.fetchCountryList()
         searchCountry()
         setupScrollListener()
         initValues(view)
-
     }
+
 
     private fun initValues(view: View) {
         val btnBack: ImageButton = view.findViewById(R.id.toEntrance)
         btnBack.setOnClickListener {
             activity?.finish()
             exitProcess(0)
+        }
+    }
+
+
+    private fun updateAdapterData(data: List<Country>) {
+        countryAdapter.updateData(data)
+        if (data.isNotEmpty()) {
+            progressBar.visibility = View.GONE
         }
     }
 
@@ -93,8 +119,7 @@ class ChooseCountryFragment : Fragment() {
         }
 
         searchView.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (s.isNullOrEmpty()) {
@@ -104,12 +129,11 @@ class ChooseCountryFragment : Fragment() {
                 }
                 vm.performSearch(s.toString())
                 if (s.isNullOrEmpty()) {
-                    countryAdapter.updateData(countryAdapter.getFullList())
+                    updateAdapterData(countryAdapter.getFullList())
                 }
             }
 
-            override fun afterTextChanged(s: Editable?) {
-            }
+            override fun afterTextChanged(s: Editable?) {}
         })
     }
 
@@ -126,14 +150,14 @@ class ChooseCountryFragment : Fragment() {
                 if (isAtBottom) {
                     scrollBtn.rotation = 270f
                     scrollBtn.setOnClickListener {
-                        if(lastVisibleItem > posForScroll)
+                        if (lastVisibleItem > posForScroll)
                             recyclerView.scrollToPosition(posForScroll)
                         recyclerView.smoothScrollToPosition(0)
                     }
                 } else {
                     scrollBtn.rotation = 90f
                     scrollBtn.setOnClickListener {
-                        if(lastVisibleItem < posForScroll)
+                        if (lastVisibleItem < posForScroll)
                             recyclerView.scrollToPosition(totalItemCount - posForScroll)
                         recyclerView.smoothScrollToPosition(totalItemCount)
                     }
@@ -152,3 +176,4 @@ class ChooseCountryFragment : Fragment() {
         }
     }
 }
+

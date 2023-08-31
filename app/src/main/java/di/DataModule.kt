@@ -47,6 +47,7 @@ object DataModule {
             .baseUrl("https://restcountries.com/")
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
+
     }
 
     @Provides
@@ -55,15 +56,7 @@ object DataModule {
     }
 
 }
-//1) Retrofit ///// DONE
-//2) Прочитать про dependecies injection //// DONE
-//3) постараться перенести на viewmodel ///// DONE
-//4) use recyclerview ///// DONE
-//5) раскидать все по пакетам к каждому viewmodel ///// DONE
-//6) прочитать repository pattern //// DONE
-//7) посмотреть все про lifecycle //// DONE
-//8) посмотреть что такое flow с coroutines ///// DONE
+
 //###################################
-//9) Попробовать сделать offline mode (cash - Room database) ==========
+//9) try make offline mode (cash - Room database) ==========
 //###################################
-//10) https://medium.com/@BerkOzyurt/android-clean-architecture-mvvm-usecase-ae1647f0aea3 почитать //// DONE
