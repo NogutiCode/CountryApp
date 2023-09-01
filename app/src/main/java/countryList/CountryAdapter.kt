@@ -69,7 +69,7 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
             val formattedCapital = capital ?: ""
             countryText.text = name
             capitalText.text = formattedCapital
-            val borderColor = ContextCompat.getColor(itemView.context, R.color.gray)
+            val borderColor = ContextCompat.getColor(itemView.context, R.color.countryDesign)
 
             Glide.with(itemView)
                 .load(flag)

@@ -121,7 +121,7 @@ class InfoViewModel @Inject constructor(
     }
 
     fun loadCountryImage(context: Context, imageUrl: String, imageView: ImageView) {
-        val borderColor = ContextCompat.getColor(imageView.context, R.color.gray)
+        val borderColor = ContextCompat.getColor(imageView.context, R.color.countryDesign)
         Glide.with(context)
             .load(imageUrl)
             .apply(

@@ -10,7 +10,6 @@
     <color name="gray">#cfc1c0</color>
     <color name="dark_gray">#756f6e</color>
     <color name="darkest_gray">#212121</color>
-    <color name="countryDesign">#756f6e</color>
-    <color name="btnColor">#cfc1c0</color>
+    <color name="countryDesign">#212121</color>
 
 </resources>

@@ -92,10 +92,6 @@ class CountryInfoFragment : Fragment() {
         val neighborsText = view?.findViewById<TextView>(R.id.setNeighbours)
         val populationText = view?.findViewById<TextView>(R.id.setPopulation)
 
-        val noNeighborsText = "No have neighbours"
-        val noCurrency = "No own currency"
-        val noCapital = "No own capital"
-
         countryNameText?.text = processedInfo.name
         countryNameText1?.text = processedInfo.name
         capitalTexts?.text = processedInfo.formattedCapital
@@ -105,6 +101,10 @@ class CountryInfoFragment : Fragment() {
         if (stopFunction) {
             return
         }
+
+        val noNeighborsText = "No have neighbours"
+        val noCurrency = "No own currency"
+        val noCapital = "No own capital"
 
         if (processedInfo.neighbours.isEmpty()) {
             neighborsText?.text = noNeighborsText

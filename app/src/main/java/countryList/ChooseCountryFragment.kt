@@ -85,6 +85,7 @@ class ChooseCountryFragment : Fragment() {
             }
         }
 
+
         vm.recyclerViewVisibility.observe(viewLifecycleOwner) { visibility ->
             recyclerView.visibility = visibility
         }
