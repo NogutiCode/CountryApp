@@ -1,6 +1,5 @@
 package countryList
 
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -36,23 +35,12 @@ class ListViewModel @Inject constructor(
 
     private val _recyclerViewVisibility = MutableLiveData(View.VISIBLE)
     val recyclerViewVisibility: LiveData<Int> = _recyclerViewVisibility
-
-    private val countries: MutableList<Array<String>> = mutableListOf()
     fun fetchCountryList() {
         viewModelScope.launch {
             repository.fetchCountryList()
                 .flowOn(Dispatchers.IO)
                 .collect { countryList ->
                     countryListFlow.value = countryList
-                    countries.clear()
-                    for (country in countryListFlow.value) {
-                        val cca3 = country.cca3.toString()
-                        val name = country.name?.common ?: ""
-                        countries.add(arrayOf(cca3, name))
-                    }
-                    for (row in countries) {
-                        Log.d("Array", "${row[0]} - ${row[1]}")
-                    }
                 }
             }
         }

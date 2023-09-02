@@ -5,11 +5,15 @@ data class Country(
     val name: Name?,
     val capital: Any?,
     val flags: Flags?,
+)
+data class CountryInfo(
+    val name: Name?,
+    val capital: Any?,
+    val flags: Flags?,
     val currencies: Map<String, Currency>?,
     val population: Int?,
     val borders: Any?,
     val cca3: Any?
-
 )
 
 data class Currency(

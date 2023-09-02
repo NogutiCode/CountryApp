@@ -48,7 +48,7 @@ class CountryInfoFragment : Fragment() {
         val layout = view.findViewById<LinearLayout>(R.id.listOfCountries)
         val setCountry = view.findViewById<TextView>(R.id.setCountry)
 
-        val countryKey = arguments?.getString("countryName").toString()
+       val countryKey = arguments?.getString("countryName").toString()
 
         lifecycleScope.launchWhenStarted {
             vm.loadingStateFlow.collect { isLoading ->

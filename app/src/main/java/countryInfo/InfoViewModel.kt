@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat
 import countryRepository.CountryRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.Country
+import app.CountryInfo
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.countryapp.R
@@ -45,10 +45,10 @@ class InfoViewModel @Inject constructor(
     private val _processedCountryInfoStateFlow = MutableStateFlow<ProcessedCountryInfo?>(null)
     val processedCountryInfoStateFlow: StateFlow<ProcessedCountryInfo?> = _processedCountryInfoStateFlow
 
-    fun fetchCountryInfo(countryName: String) { // Get info from api key - and parse it
+    fun fetchCountryInfo(countryName: String) {
         viewModelScope.launch {
             _loadingStateFlow.value = true
-            repository.fetchCountryList()
+            repository.fetchCountryInfo()
                 .map { countryList ->
                     val selectedCountry = countryList.find { it.name?.common == countryName }
                     selectedCountry?.let { country ->
@@ -69,8 +69,8 @@ class InfoViewModel @Inject constructor(
     }
 
     private fun processCountry(
-        country: Country,
-        countryList: List<Country>,
+        country: CountryInfo,
+        countryList: List<CountryInfo>,
         countryKey: String
     ): ProcessedCountryInfo {
         val nameCountry = country.name?.common.toString()
