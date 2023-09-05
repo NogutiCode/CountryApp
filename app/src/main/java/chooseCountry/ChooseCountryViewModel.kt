@@ -1,8 +1,6 @@
-package countryList
+package chooseCountry
 
 import android.view.View
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import countryRepository.CountryRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -18,12 +17,22 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class ListViewModel @Inject constructor(
+class ChooseCountryViewModel @Inject constructor(
     private val repository: CountryRepository
+
 ) : ViewModel() {
 
     private val countryListFlow = MutableStateFlow<List<Country>>(emptyList())
     private val filteredCountryListFlow = MutableStateFlow<List<Country>>(emptyList())
+
+    private val _loadingStateFlow = MutableStateFlow(false)
+    val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
+
+    private val _recyclerViewVisibility = MutableStateFlow(View.VISIBLE)
+    val recyclerViewVisibility: StateFlow<Int> = _recyclerViewVisibility
+
+    private var isFirstLoad = true
+
     val combinedCountryListFlow: Flow<List<Country>> = combine(
         countryListFlow,
         filteredCountryListFlow
@@ -33,17 +42,23 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    private val _recyclerViewVisibility = MutableLiveData(View.VISIBLE)
-    val recyclerViewVisibility: LiveData<Int> = _recyclerViewVisibility
+
     fun fetchCountryList() {
+        if (!isFirstLoad) {
+            return
+        }
         viewModelScope.launch {
+            _loadingStateFlow.value = true
             repository.fetchCountryList()
                 .flowOn(Dispatchers.IO)
                 .collect { countryList ->
                     countryListFlow.value = countryList
+                    _loadingStateFlow.value = false
+                    isFirstLoad = false
                 }
             }
         }
+
     fun performSearch(query: String) {
         val lowercaseQuery = query.lowercase(Locale.getDefault())
         val queryWords = lowercaseQuery.split(" ")

@@ -12,21 +12,21 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import okhttp3.*
 
 
-@Suppress("DEPRECATION")
+
 @AndroidEntryPoint
 class CountryInfoFragment : Fragment() {
 
-    private val vm: InfoViewModel by viewModels()
+    private val countryInfoViewModel: CountryInfoViewModel by viewModels()
     private var countryKey: String = ""
     private lateinit var progressBar: ProgressBar
     private lateinit var layout: LinearLayout
     private lateinit var setCountry: TextView
     private lateinit var navController: NavController
     private lateinit var call: Call
-    private var stopFunction = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,22 +50,22 @@ class CountryInfoFragment : Fragment() {
 
        val countryKey = arguments?.getString("countryName").toString()
 
-        lifecycleScope.launchWhenStarted {
-            vm.loadingStateFlow.collect { isLoading ->
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.loadingStateFlow.collect { isLoading ->
                 progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
                 layout.visibility = if (isLoading) View.GONE else View.VISIBLE
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            vm.processedCountryInfoStateFlow.collect { processedInfo: InfoViewModel.ProcessedCountryInfo? ->
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.processedCountryInfoStateFlow.collect { processedInfo: CountryInfoViewModel.ProcessedCountryInfo? ->
                 processedInfo?.let {
                     buildDesign(it)
                     setCountry.visibility = View.VISIBLE
                 }
             }
         }
-        vm.fetchCountryInfo(countryKey)
+        countryInfoViewModel.fetchCountryInfo(countryKey)
         initButtonsAndValues()
     }
 
@@ -75,15 +75,11 @@ class CountryInfoFragment : Fragment() {
             if (::call.isInitialized) {
                 call.cancel()
             }
-            stopFunction = true
             navController.navigateUp()
         }
     }
 
-    private fun buildDesign(processedInfo: InfoViewModel.ProcessedCountryInfo) {
-        if (stopFunction) {
-            return
-        }
+    private fun buildDesign(processedInfo: CountryInfoViewModel.ProcessedCountryInfo) {
         val countryNameText = view?.findViewById<TextView>(R.id.setCountry)
         val countryNameText1 = view?.findViewById<TextView>(R.id.setCountryText)
         val countryPhoto = view?.findViewById<ImageView>(R.id.countryImage)
@@ -98,9 +94,7 @@ class CountryInfoFragment : Fragment() {
         currencyText?.text = processedInfo.currency
         populationText?.text = processedInfo.formattedPopulation
         neighborsText?.text = processedInfo.neighbours
-        if (stopFunction) {
-            return
-        }
+
 
         val noNeighborsText = "No have neighbours"
         val noCurrency = "No own currency"
@@ -117,7 +111,7 @@ class CountryInfoFragment : Fragment() {
         }
 
         if (countryPhoto != null) {
-            vm.loadCountryImage(requireContext(), processedInfo.flag, countryPhoto)
+            countryInfoViewModel.loadCountryImage(requireContext(), processedInfo.flag, countryPhoto)
         }
     }
 }

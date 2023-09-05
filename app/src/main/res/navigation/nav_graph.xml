@@ -14,7 +14,7 @@
     </fragment>
     <fragment
         android:id="@+id/chooseCountry"
-        android:name="countryList.ChooseCountryFragment"
+        android:name="chooseCountry.ChooseCountryFragment"
         android:label="fragment_choose_country">
         <action
             android:id="@+id/action_chooseCountry_to_countryInfo"

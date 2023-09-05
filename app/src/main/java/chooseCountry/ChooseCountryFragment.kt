@@ -1,4 +1,4 @@
-package countryList
+package chooseCountry
 
 import android.content.Intent
 import android.os.Bundle
@@ -28,13 +28,14 @@ import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class ChooseCountryFragment : Fragment() {
-    private val vm: ListViewModel by viewModels()
+    private val chooseCountryViewModel: ChooseCountryViewModel by viewModels()
     private lateinit var navController: NavController
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: RecyclerView
     private lateinit var countryAdapter: CountryAdapter
     private lateinit var scrollBtn: ImageButton
     private lateinit var searchView: EditText
+    private var isFirstLoad = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,7 +45,6 @@ class ChooseCountryFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         scrollBtn = view.findViewById(R.id.InvisibleBtn)
         recyclerView = view.findViewById(R.id.recyclerViewCountries)
-
         return view
     }
 
@@ -69,28 +69,28 @@ class ChooseCountryFragment : Fragment() {
             }
         }
 
-        countryAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onChanged() {
-                super.onChanged()
-                if (countryAdapter.itemCount > 0) {
-                    progressBar.visibility = View.GONE
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            chooseCountryViewModel.loadingStateFlow.collect { isLoading ->
+                progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             }
-        })
+        }
 
 
         viewLifecycleOwner.lifecycleScope.launch {
-            vm.combinedCountryListFlow.collect { combinedList ->
+            chooseCountryViewModel.combinedCountryListFlow.collect { combinedList ->
                 updateAdapterData(combinedList)
             }
         }
 
-
-        vm.recyclerViewVisibility.observe(viewLifecycleOwner) { visibility ->
-            recyclerView.visibility = visibility
+        viewLifecycleOwner.lifecycleScope.launch {
+            chooseCountryViewModel.recyclerViewVisibility.collect { visibility ->
+                recyclerView.visibility = visibility
+            }
         }
-
-        vm.fetchCountryList()
+        if (isFirstLoad) {
+            chooseCountryViewModel.fetchCountryList()
+            isFirstLoad = false
+        }
         searchCountry()
         setupScrollListener()
         initValues(view)
@@ -128,7 +128,7 @@ class ChooseCountryFragment : Fragment() {
                 } else {
                     clearButton?.visibility = View.VISIBLE
                 }
-                vm.performSearch(s.toString())
+                chooseCountryViewModel.performSearch(s.toString())
                 if (s.isNullOrEmpty()) {
                     updateAdapterData(countryAdapter.getFullList())
                 }

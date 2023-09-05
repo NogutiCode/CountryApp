@@ -1,4 +1,4 @@
-package countryList
+package chooseCountry
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater

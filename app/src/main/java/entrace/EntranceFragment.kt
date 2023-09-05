@@ -7,15 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.example.countryapp.R
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class EntranceFragment : Fragment() {
     private lateinit var navController: NavController
-    private val viewModel: EntranceViewModel by viewModels()
+    private val entranceViewModel: EntranceViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,11 +35,15 @@ class EntranceFragment : Fragment() {
     }
 
     private fun initFirstLaunch() {
-        if (viewModel.isFirstLaunch) {
-            viewModel.markFirstLaunchDone()
-            navController.navigate(R.id.entrance)
-        } else {
-            navController.navigate(R.id.action_entrance_to_chooseCountry)
+        viewLifecycleOwner.lifecycleScope.launch {
+            entranceViewModel.isFirstLaunchFlow.collect { isFirstLaunch ->
+                if (isFirstLaunch) {
+                    entranceViewModel.markFirstLaunchDone()
+                    navController.navigate(R.id.entrance)
+                } else {
+                    navController.navigate(R.id.action_entrance_to_chooseCountry)
+                }
+            }
         }
     }
 
@@ -48,4 +54,3 @@ class EntranceFragment : Fragment() {
         }
     }
 }
-
