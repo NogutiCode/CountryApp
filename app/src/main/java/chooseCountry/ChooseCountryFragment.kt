@@ -20,15 +20,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.Country
 import com.example.countryapp.R
+import countryRepository.CountryRepository
 import dagger.hilt.android.AndroidEntryPoint
 import entrace.MainActivity
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.system.exitProcess
 
 
 @AndroidEntryPoint
 class ChooseCountryFragment : Fragment() {
     private val chooseCountryViewModel: ChooseCountryViewModel by viewModels()
+
+
+    @Inject
+    lateinit var countryRepository: CountryRepository
     private lateinit var navController: NavController
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: RecyclerView
@@ -173,7 +180,10 @@ class ChooseCountryFragment : Fragment() {
             val bundle = Bundle().apply {
                 putString("countryName", countryName)
             }
-            navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                navController.navigate(R.id.action_chooseCountry_to_countryInfo, bundle)
+            }
         }
     }
 }

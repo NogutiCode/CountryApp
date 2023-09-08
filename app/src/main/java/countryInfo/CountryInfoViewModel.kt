@@ -2,11 +2,15 @@ package countryInfo
 
 
 import android.content.Context
+import android.util.Log
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import countryRepository.CountryRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+
 import app.CountryInfo
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -35,9 +39,12 @@ class CountryInfoViewModel @Inject constructor(
         val formattedCapital: String,
         val flag: String,
         val currency: String,
-        val neighbours: String,
-        val formattedPopulation: String
+        val formattedPopulation: String,
     )
+
+
+    private val _borderCountriesStringLiveData = MutableLiveData<String>()
+    val borderCountriesStringLiveData: LiveData<String> = _borderCountriesStringLiveData
 
     private val _loadingStateFlow = MutableStateFlow(false)
     val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
@@ -48,33 +55,43 @@ class CountryInfoViewModel @Inject constructor(
     fun fetchCountryInfo(countryName: String) {
         viewModelScope.launch {
             _loadingStateFlow.value = true
-            repository.fetchCountryInfo()
+            repository.fetchCountryInfo(countryName)
                 .map { countryList ->
                     val selectedCountry = countryList.find { it.name?.common == countryName }
                     selectedCountry?.let { country ->
-                        processCountry(country, countryList, countryName)
+                        processCountry(country)
                     }
                 }
                 .flowOn(Dispatchers.Default)
                 .collect { processedInfo ->
                     _processedCountryInfoStateFlow.value = processedInfo
-                    _loadingStateFlow.value = false
                 }
         }
     }
+
+    private fun fetchBordersInfo(borders: String) {
+        viewModelScope.launch {
+            repository.fetchBordersInfo(borders)
+                .map { borderCountries ->
+                    val neededBorders = borderCountries.mapNotNull { it.name?.common }
+                    val borderCountriesString = neededBorders.joinToString(", ")
+                    Log.e("bob", neededBorders.toString())
+                    _borderCountriesStringLiveData.postValue(borderCountriesString)
+                }
+                .flowOn(Dispatchers.Default)
+                .collect { }
+            _loadingStateFlow.value = false
+        }
+    }
+
 
     private fun formatNumberWithCommas(number: Int): String {
         val numberFormat = NumberFormat.getNumberInstance(Locale.US)
         return numberFormat.format(number)
     }
 
-    private fun processCountry(
-        country: CountryInfo,
-        countryList: List<CountryInfo>,
-        countryKey: String
-    ): ProcessedCountryInfo {
+    private fun processCountryInfo(country: CountryInfo): ProcessedCountryInfo {
         val nameCountry = country.name?.common.toString()
-        val arrayNames = countryList.map { it.name?.common }.toTypedArray()
         val capital = country.capital?.toString()?.replace("[", "")?.replace("]", "")
         val formattedCapital = capital ?: ""
         val flag = country.flags?.png.toString()
@@ -89,35 +106,33 @@ class CountryInfoViewModel @Inject constructor(
         val population = country.population.toString()
         val formattedPopulation = formatNumberWithCommas(population.toInt())
 
-        val borders = country.borders?.toString()?.replace("[", "")?.replace("]", "")
-        val withoutBracketsBorders = borders ?: ""
-        val withoutComma = withoutBracketsBorders.split(", ")
-        val arrayBorders = withoutComma.toTypedArray()
-
-        val arrayFifa = countryList.map { it.cca3 }.toTypedArray()
-
-        val builder = StringBuilder()// Find neighbours
-        if (nameCountry == countryKey) {
-            for (i in arrayFifa.indices) {
-                for (element in arrayBorders) {
-                    if (element == arrayFifa[i]) {
-                        if (builder.isNotEmpty()) {
-                            builder.append(", ")
-                        }
-                        builder.append(arrayNames[i])
-                    }
-                }
-            }
-        }
-        val listNeighbors = builder.toString()
         return ProcessedCountryInfo(
             nameCountry,
             formattedCapital,
             flag,
             "$formattedCurrencySmallName $formattedCurrencyFullName",
-            listNeighbors,
             formattedPopulation
         )
+    }
+
+
+    private fun processCountry(
+        country: CountryInfo
+    ): ProcessedCountryInfo {
+        val processedInfo = processCountryInfo(country)
+        val borders = country.borders?.toString()?.filter { it.isLetterOrDigit() || it == ',' }
+
+        if(borders != null){
+            viewModelScope.launch {
+                fetchBordersInfo(borders.toString())
+            }
+        }
+        else{
+            _borderCountriesStringLiveData.postValue("No have neighbours")
+            _loadingStateFlow.value = false
+        }
+
+        return processedInfo
     }
 
     fun loadCountryImage(context: Context, imageUrl: String, imageView: ImageView) {

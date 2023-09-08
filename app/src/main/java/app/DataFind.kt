@@ -16,6 +16,7 @@ data class CountryInfo(
     val cca3: Any?
 )
 
+
 data class Currency(
     val name: String?,
 )

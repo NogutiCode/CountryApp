@@ -61,10 +61,18 @@ class CountryInfoFragment : Fragment() {
             countryInfoViewModel.processedCountryInfoStateFlow.collect { processedInfo: CountryInfoViewModel.ProcessedCountryInfo? ->
                 processedInfo?.let {
                     buildDesign(it)
-                    setCountry.visibility = View.VISIBLE
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.borderCountriesStringLiveData.observe(viewLifecycleOwner) { neighbors ->
+                // Update the UI to display neighbors
+                val neighborsText = view.findViewById<TextView>(R.id.setNeighbours)
+                neighborsText?.text = neighbors
+            }
+        }
+
         countryInfoViewModel.fetchCountryInfo(countryKey)
         initButtonsAndValues()
     }
@@ -93,16 +101,16 @@ class CountryInfoFragment : Fragment() {
         capitalTexts?.text = processedInfo.formattedCapital
         currencyText?.text = processedInfo.currency
         populationText?.text = processedInfo.formattedPopulation
-        neighborsText?.text = processedInfo.neighbours
+       // neighborsText?.text = processedInfo.neighbours
 
 
         val noNeighborsText = "No have neighbours"
         val noCurrency = "No own currency"
         val noCapital = "No own capital"
 
-        if (processedInfo.neighbours.isEmpty()) {
+        /*if (processedInfo.neighbours.isEmpty()) {
             neighborsText?.text = noNeighborsText
-        }
+        }*/
         if (processedInfo.currency.trim().isEmpty()) {
             currencyText?.text = noCurrency
         }
