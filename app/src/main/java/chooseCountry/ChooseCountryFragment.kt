@@ -23,7 +23,6 @@ import com.example.countryapp.R
 import countryRepository.CountryRepository
 import dagger.hilt.android.AndroidEntryPoint
 import entrace.MainActivity
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.system.exitProcess
@@ -63,37 +62,12 @@ class ChooseCountryFragment : Fragment() {
         countryAdapter = CountryAdapter { position -> onItemClick(position) }
         recyclerView.adapter = countryAdapter
 
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            val currentDestination = navController.currentDestination
-
-            if (currentDestination?.id == R.id.chooseCountry) {
-                activity?.finish()
-            } else {
-                val intent = Intent(requireContext(), MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            chooseCountryViewModel.loadingStateFlow.collect { isLoading ->
-                progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-            }
-        }
+        setupOnBackPressed()
+        observeLoadingState()
+        observeCombinedCountryList()
+        observeRecyclerViewVisibility()
 
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            chooseCountryViewModel.combinedCountryListFlow.collect { combinedList ->
-                updateAdapterData(combinedList)
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            chooseCountryViewModel.recyclerViewVisibility.collect { visibility ->
-                recyclerView.visibility = visibility
-            }
-        }
         if (isFirstLoad) {
             chooseCountryViewModel.fetchCountryList()
             isFirstLoad = false
@@ -109,6 +83,47 @@ class ChooseCountryFragment : Fragment() {
         btnBack.setOnClickListener {
             activity?.finish()
             exitProcess(0)
+        }
+    }
+
+
+
+
+    private fun setupOnBackPressed() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            val currentDestination = navController.currentDestination
+
+            if (currentDestination?.id == R.id.chooseCountry) {
+                activity?.finish()
+            } else {
+                val intent = Intent(requireContext(), MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun observeLoadingState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            chooseCountryViewModel.loadingStateFlow.collect { isLoading ->
+                progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            }
+        }
+    }
+
+    private fun observeCombinedCountryList() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            chooseCountryViewModel.combinedCountryListFlow.collect { combinedList ->
+                updateAdapterData(combinedList)
+            }
+        }
+    }
+
+    private fun observeRecyclerViewVisibility() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            chooseCountryViewModel.recyclerViewVisibility.collect { visibility ->
+                recyclerView.visibility = visibility
+            }
         }
     }
 

@@ -43,6 +43,12 @@ class CountryInfoViewModel @Inject constructor(
     )
 
 
+    private val _currencyText = MutableLiveData<String>()
+    val currencyText: LiveData<String> = _currencyText
+
+    private val _capitalTexts = MutableLiveData<String>()
+    val capitalTexts: LiveData<String> = _capitalTexts
+
     private val _borderCountriesStringLiveData = MutableLiveData<String>()
     val borderCountriesStringLiveData: LiveData<String> = _borderCountriesStringLiveData
 
@@ -121,6 +127,18 @@ class CountryInfoViewModel @Inject constructor(
     ): ProcessedCountryInfo {
         val processedInfo = processCountryInfo(country)
         val borders = country.borders?.toString()?.filter { it.isLetterOrDigit() || it == ',' }
+
+        if (processedInfo.currency.isBlank()) {
+            _currencyText.postValue("No own currency")
+        } else {
+            _currencyText.postValue(processedInfo.currency)
+        }
+
+        if (processedInfo.formattedCapital.isBlank()) {
+            _capitalTexts.postValue("No own capital")
+        } else {
+            _capitalTexts.postValue(processedInfo.formattedCapital)
+        }
 
         if(borders != null){
             viewModelScope.launch {

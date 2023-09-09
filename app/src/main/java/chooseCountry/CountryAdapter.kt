@@ -25,34 +25,34 @@ class CountryAdapter(private val onItemClick: (Int) -> Unit) :
 
 
     @SuppressLint("NotifyDataSetChanged")
-    fun updateData(newCountryList: List<Country>) { //for search view
+    fun updateData(newCountryList: List<Country>) {
         countryList = newCountryList
         fullCountryList = newCountryList
         notifyDataSetChanged()
     }
-    fun getItem(position: Int): Country { //Get a country item at the specified position.
+    fun getItem(position: Int): Country {
         return countryList[position]
     }
 
-    fun getFullList(): List<Country> { //used  to get full list
+    fun getFullList(): List<Country> {
         return fullCountryList
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder { //function that gets design of button from item_country.xml
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_country, parent, false)
         return CountryViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: CountryViewHolder, position: Int) { // Bind the country data to the ViewHolder.
+    override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
         holder.bind(countryList[position])
     }
 
-    override fun getItemCount(): Int { //used  to get item count
+    override fun getItemCount(): Int {
         return countryList.size
     }
 
-    inner class CountryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) { // this thing put information to our buttons
+    inner class CountryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val button: Button = itemView.findViewById(R.id.countryButton)
         private val imageView: ImageView = itemView.findViewById(R.id.countryImageView)
         private val countryText: TextView = itemView.findViewById(R.id.countryText)

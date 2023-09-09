@@ -44,37 +44,16 @@ class CountryInfoFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
 
-        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
-        val layout = view.findViewById<LinearLayout>(R.id.listOfCountries)
-        val setCountry = view.findViewById<TextView>(R.id.setCountry)
+        progressBar = view.findViewById(R.id.progressBar)
+        layout = view.findViewById(R.id.listOfCountries)
+        setCountry = view.findViewById(R.id.setCountry)
 
-       val countryKey = arguments?.getString("countryName").toString()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            countryInfoViewModel.loadingStateFlow.collect { isLoading ->
-                progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-                layout.visibility = if (isLoading) View.GONE else View.VISIBLE
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            countryInfoViewModel.processedCountryInfoStateFlow.collect { processedInfo: CountryInfoViewModel.ProcessedCountryInfo? ->
-                processedInfo?.let {
-                    buildDesign(it)
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            countryInfoViewModel.borderCountriesStringLiveData.observe(viewLifecycleOwner) { neighbors ->
-                // Update the UI to display neighbors
-                val neighborsText = view.findViewById<TextView>(R.id.setNeighbours)
-                neighborsText?.text = neighbors
-            }
-        }
-
+        observeLoadingState()
+        observeProcessedCountryInfo()
+        placeInfoAboutCountry()
         countryInfoViewModel.fetchCountryInfo(countryKey)
         initButtonsAndValues()
+
     }
 
     private fun initButtonsAndValues() {
@@ -87,36 +66,56 @@ class CountryInfoFragment : Fragment() {
         }
     }
 
+    private fun observeLoadingState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.loadingStateFlow.collect { isLoading ->
+                progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                layout.visibility = if (isLoading) View.GONE else View.VISIBLE
+            }
+        }
+    }
+
+    private fun observeProcessedCountryInfo() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.processedCountryInfoStateFlow.collect { processedInfo: CountryInfoViewModel.ProcessedCountryInfo? ->
+                processedInfo?.let {
+                    buildDesign(it)
+                }
+            }
+        }
+    }
+
+    private fun placeInfoAboutCountry() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.borderCountriesStringLiveData.observe(viewLifecycleOwner) { neighbors ->
+                val neighborsText = view?.findViewById<TextView>(R.id.setNeighbours)
+                neighborsText?.text = neighbors
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.capitalTexts.observe(viewLifecycleOwner) { capital ->
+                val capitalTextView = view?.findViewById<TextView>(R.id.setCapitalText)
+                capitalTextView?.text = capital
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            countryInfoViewModel.currencyText.observe(viewLifecycleOwner) { currency ->
+                val currencyTextView = view?.findViewById<TextView>(R.id.setCurrency)
+                currencyTextView?.text = currency
+            }
+        }
+    }
     private fun buildDesign(processedInfo: CountryInfoViewModel.ProcessedCountryInfo) {
         val countryNameText = view?.findViewById<TextView>(R.id.setCountry)
         val countryNameText1 = view?.findViewById<TextView>(R.id.setCountryText)
         val countryPhoto = view?.findViewById<ImageView>(R.id.countryImage)
-        val capitalTexts = view?.findViewById<TextView>(R.id.setCapitalText)
-        val currencyText = view?.findViewById<TextView>(R.id.setCurrency)
-        val neighborsText = view?.findViewById<TextView>(R.id.setNeighbours)
         val populationText = view?.findViewById<TextView>(R.id.setPopulation)
 
         countryNameText?.text = processedInfo.name
         countryNameText1?.text = processedInfo.name
-        capitalTexts?.text = processedInfo.formattedCapital
-        currencyText?.text = processedInfo.currency
         populationText?.text = processedInfo.formattedPopulation
-       // neighborsText?.text = processedInfo.neighbours
-
-
-        val noNeighborsText = "No have neighbours"
-        val noCurrency = "No own currency"
-        val noCapital = "No own capital"
-
-        /*if (processedInfo.neighbours.isEmpty()) {
-            neighborsText?.text = noNeighborsText
-        }*/
-        if (processedInfo.currency.trim().isEmpty()) {
-            currencyText?.text = noCurrency
-        }
-        if (processedInfo.formattedCapital.isEmpty()) {
-            capitalTexts?.text = noCapital
-        }
 
         if (countryPhoto != null) {
             countryInfoViewModel.loadCountryImage(requireContext(), processedInfo.flag, countryPhoto)
