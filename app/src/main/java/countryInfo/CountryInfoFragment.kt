@@ -87,21 +87,21 @@ class CountryInfoFragment : Fragment() {
 
     private fun placeInfoAboutCountry() {
         viewLifecycleOwner.lifecycleScope.launch {
-            countryInfoViewModel.borderCountriesStringLiveData.observe(viewLifecycleOwner) { neighbors ->
+            countryInfoViewModel.borderCountriesStringFlow.collect { neighbors ->
                 val neighborsText = view?.findViewById<TextView>(R.id.setNeighbours)
                 neighborsText?.text = neighbors
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            countryInfoViewModel.capitalTexts.observe(viewLifecycleOwner) { capital ->
+            countryInfoViewModel.capitalTexts.collect { capital ->
                 val capitalTextView = view?.findViewById<TextView>(R.id.setCapitalText)
                 capitalTextView?.text = capital
             }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            countryInfoViewModel.currencyText.observe(viewLifecycleOwner) { currency ->
+            countryInfoViewModel.currencyText.collect { currency ->
                 val currencyTextView = view?.findViewById<TextView>(R.id.setCurrency)
                 currencyTextView?.text = currency
             }

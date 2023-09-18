@@ -5,8 +5,6 @@ import android.content.Context
 import android.util.Log
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import countryRepository.CountryRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,14 +41,14 @@ class CountryInfoViewModel @Inject constructor(
     )
 
 
-    private val _currencyText = MutableLiveData<String>()
-    val currencyText: LiveData<String> = _currencyText
+    private val _currencyText = MutableStateFlow("")
+    val currencyText: StateFlow<String> = _currencyText
 
-    private val _capitalTexts = MutableLiveData<String>()
-    val capitalTexts: LiveData<String> = _capitalTexts
+    private val _capitalTexts = MutableStateFlow("")
+    val capitalTexts: StateFlow<String> = _capitalTexts
 
-    private val _borderCountriesStringLiveData = MutableLiveData<String>()
-    val borderCountriesStringLiveData: LiveData<String> = _borderCountriesStringLiveData
+    private val _borderCountriesStringFlow = MutableStateFlow("")
+    val borderCountriesStringFlow: StateFlow<String> = _borderCountriesStringFlow
 
     private val _loadingStateFlow = MutableStateFlow(false)
     val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
@@ -82,7 +80,7 @@ class CountryInfoViewModel @Inject constructor(
                     val neededBorders = borderCountries.mapNotNull { it.name?.common }
                     val borderCountriesString = neededBorders.joinToString(", ")
                     Log.e("bob", neededBorders.toString())
-                    _borderCountriesStringLiveData.postValue(borderCountriesString)
+                    _borderCountriesStringFlow.value = borderCountriesString
                 }
                 .flowOn(Dispatchers.Default)
                 .collect { }
@@ -129,15 +127,15 @@ class CountryInfoViewModel @Inject constructor(
         val borders = country.borders?.toString()?.filter { it.isLetterOrDigit() || it == ',' }
 
         if (processedInfo.currency.isBlank()) {
-            _currencyText.postValue("No own currency")
+            _currencyText.value = "No own currency"
         } else {
-            _currencyText.postValue(processedInfo.currency)
+            _currencyText.value = processedInfo.currency
         }
 
         if (processedInfo.formattedCapital.isBlank()) {
-            _capitalTexts.postValue("No own capital")
+            _capitalTexts.value = "No own capital"
         } else {
-            _capitalTexts.postValue(processedInfo.formattedCapital)
+            _capitalTexts.value = processedInfo.formattedCapital
         }
 
         if(borders != null){
@@ -146,7 +144,7 @@ class CountryInfoViewModel @Inject constructor(
             }
         }
         else{
-            _borderCountriesStringLiveData.postValue("No have neighbours")
+            _borderCountriesStringFlow.value = "No have neighbours"
             _loadingStateFlow.value = false
         }
 
